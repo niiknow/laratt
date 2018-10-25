@@ -11,6 +11,7 @@ use Validator;
 use Carbon\Carbon;
 use League\Csv\Reader;
 use Yajra\DataTables\DataTables;
+use Niiknow\Laratt\RequestQueryBuilder;
 
 use Niiknow\Laratt\TenancyResolver;
 
