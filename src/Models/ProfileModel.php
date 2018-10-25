@@ -11,7 +11,7 @@ use Niiknow\Laratt\Traits\CloudAuditable;
 use Niiknow\Laratt\Traits\TableModelTrait;
 use Carbon\Carbon;
 
-class Profile extends Authenticatable
+class ProfileModel extends Authenticatable
 {
     use CloudAuditable,
         TableModelTrait;
