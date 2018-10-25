@@ -60,8 +60,8 @@ trait CloudAuditable
             return false;
         }
 
-        $iten = config('admin.audit.include.tenant');
-        $itab = config('admin.audit.include.table');
+        $iten = config('laratt.audit.include.tenant');
+        $itab = config('laratt.audit.include.table');
         if (!isset($iten) || !isset($itab)) {
             return false;
         }
@@ -73,8 +73,8 @@ trait CloudAuditable
             return false;
         }
 
-        $xten = config('admin.audit.exclude.tenant');
-        $xtab = config('admin.audit.exclude.table');
+        $xten = config('laratt.audit.exclude.tenant');
+        $xtab = config('laratt.audit.exclude.table');
 
         if (isset($xten) && preg_match("/$xten/", $parts[0])) {
             return false;
@@ -217,7 +217,7 @@ trait CloudAuditable
         }
 
         // store to s3
-        $bucket = config('admin.audit.bucket');
+        $bucket = config('laratt.audit.bucket');
         if (!isset($bucket) || strlen($bucket) <= 0) {
             return $this;
         }

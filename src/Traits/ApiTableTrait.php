@@ -474,7 +474,7 @@ trait ApiTableTrait
     public function processCsv($csv, &$data, $jobid)
     {
         $rowno = 0;
-        $limit = config('admin.import_limit', 999);
+        $limit = config('laratt.import_limit', 999);
         foreach ($csv as $row) {
             $inputs = ['job_id' => $jobid];
 

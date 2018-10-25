@@ -1,14 +1,14 @@
 <?php
 
-namespace Api\Models;
+namespace niiknow\laratt\Models;
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
 
-use Api\Models\Traits\CloudAuditable;
-use Api\Models\Traits\TableModelTrait;
+use niiknow\laratt\Traits\CloudAuditable;
+use niiknow\laratt\Traits\TableModelTrait;
 use Carbon\Carbon;
 
 class Profile extends Authenticatable
