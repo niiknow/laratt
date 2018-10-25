@@ -1,13 +1,13 @@
 <?php
 
-namespace niiknow\laratt\Models;
+namespace Niiknow\Laratt\Models;
 
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\Model;
 
-use niiknow\laratt\Traits\CloudAuditable;
-use niiknow\laratt\Traits\TableModelTrait;
+use Niiknow\Laratt\Traits\CloudAuditable;
+use Niiknow\Laratt\Traits\TableModelTrait;
 
 use Carbon\Carbon;
 

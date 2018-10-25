@@ -1,6 +1,6 @@
 <?php
 
-namespace niiknow\laratt;
+namespace Niiknow\Laratt;
 
 use Illuminate\Support\ServiceProvider;
 

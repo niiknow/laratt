@@ -1,6 +1,6 @@
 <?php
 
-namespace niiknow\laratt\Traits;
+namespace Niiknow\Laratt\Traits;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 use Carbon\Carbon;
 
-use niiknow\laratt\TenancyResolver;
+use Niiknow\Laratt\TenancyResolver;
 
 /**
  * Add ability to audit to the cloud - such as s3

@@ -1,6 +1,6 @@
 <?php
 
-namespace niiknow\laratt;
+namespace Niiknow\Laratt;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;

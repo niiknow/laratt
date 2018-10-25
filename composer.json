@@ -30,7 +30,7 @@
     },
     "autoload": {
         "psr-4": {
-            "niiknow\\laratt\\": "src/"
+            "Niiknow\\Laratt\\": "src/"
         }
     },
     "autoload-dev": {
@@ -44,7 +44,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "niiknow\\laratt\\LarattServiceProvider"
+                "Niiknow\\Laratt\\LarattServiceProvider"
             ]
         }
     },

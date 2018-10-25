@@ -1,8 +1,8 @@
 <?php
 
-namespace niiknow\laratt\Traits;
+namespace Niiknow\Laratt\Traits;
 
-use niiknow\laratt\Models\TableModel;
+use Niiknow\Laratt\Models\TableModel;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use League\Csv\Reader;
 use Yajra\DataTables\DataTables;
 
-use niiknow\laratt\TenancyResolver;
+use Niiknow\Laratt\TenancyResolver;
 
 trait ApiTableTrait
 {

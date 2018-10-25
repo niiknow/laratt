@@ -1,6 +1,6 @@
 <?php
 
-namespace niiknow\laratt\Traits;
+namespace Niiknow\Laratt\Traits;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
