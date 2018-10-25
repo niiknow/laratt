@@ -30,7 +30,7 @@
     },
     "autoload": {
         "psr-4": {
-            "niiknow\\laratt\\": "src"
+            "niiknow\\laratt\\": "src/"
         }
     },
     "autoload-dev": {
@@ -51,5 +51,10 @@
                 "niiknow\\laratt\\LarattServiceProvider"
             ]
         }
-    }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
