@@ -76,10 +76,10 @@ class TableModel extends Model
 
         if (!Schema::hasTable($tableNew)) {
             Schema::create($tableNew, function (Blueprint $table) {
-                $table->bigIncrements('id');
+                $table->increments('id');
 
                 // allow to uniquely identify this model
-                $table->string('uid')->unique();
+                $table->string('uid', 50)->unique();
 
                 // example, name: home slider
                 $table->string('name')->nullable();
@@ -112,13 +112,13 @@ class TableModel extends Model
                 $table->unsignedInteger('price')->default(0);
                 $table->unsignedInteger('sale_price')->default(0);
                 $table->unsignedSmallInteger('sale_qty')->default(1);
-                $table->string('skus')->nullable();
-                $table->string('gtins')->nullable();
+                $table->string('skus')->nullable()->index();
+                $table->string('gtins')->nullable()->index();
                 $table->string('brands')->nullable();
-                $table->string('cat1')->nullable();
-                $table->string('cat2')->nullable();
-                $table->string('cat3')->nullable();
-                $table->string('cat4')->nullable();
+                $table->string('cat1')->nullable()->index();
+                $table->string('cat2')->nullable()
+                $table->string('cat3')->nullable()
+                $table->string('cat4')->nullable()
                 $table->string('map_coords')->nullable(); // hot map coordinates
 
                 $table->timestamps();

@@ -17,12 +17,24 @@ use Niiknow\Laratt\TenancyResolver;
 
 trait ApiTableTrait
 {
-
+    /**
+     * Get the model for the controller.  Method allow
+     * for overriding with custome model.
+     *
+     * @param  array  $attrs initial model attributes
+     * @return object        the model
+     */
     public function getModel($attrs = [])
     {
         return new TableModel($attrs);
     }
 
+    /**
+     * Get the table name for the current controller.  It
+     * allow for overriding of the table name.
+     *
+     * @return string   table name for the controller
+     */
     public function getTable()
     {
         $table = request()->route('table');
@@ -40,116 +52,12 @@ trait ApiTableTrait
         return $table;
     }
 
-    /**
-     * @OA\Post(
-     *   path="/tables/{table}/create",
-     *   tags={"tables"},
-     *   summary="create new object and store in {table}",
-     *   @OA\Parameter(
-     *     name="X-API-Key",
-     *     in="header",
-     *     description="api key",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="X-Tenant",
-     *     in="header",
-     *     description="tenant id",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="table",
-     *     in="path",
-     *     description="specified table name",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Response(
-     *     response=422,
-     *     description="invalid table name"
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="new object in specified {table}"
-     *   )
-     * )
-     */
+// <begin_controller_actions
     public function create(Request $request)
     {
         return $this->upsert($request, null);
     }
 
-
-    /**
-     * @OA\Get(
-     *   path="/tables/{table}/{uid}/retrieve",
-     *   tags={"tables"},
-     *   summary="get object of specified table",
-     *   @OA\Parameter(
-     *     name="X-API-Key",
-     *     in="header",
-     *     description="api key",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="X-Tenant",
-     *     in="header",
-     *     description="tenant id",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="table",
-     *     in="path",
-     *     description="specified table name",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="uid",
-     *     in="path",
-     *     description="uid",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Response(
-     *     response=404,
-     *     description="object not found"
-     *   ),
-     *   @OA\Response(
-     *     response=422,
-     *     description="invalid table name"
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="found object"
-     *   )
-     * )
-     */
     public function retrieve()
     {
         $table = $this->getTable();
@@ -158,66 +66,6 @@ trait ApiTableTrait
         return $this->rsp(isset($item) ? 200 : 404, $item);
     }
 
-    /**
-     * @OA\Delete(
-     *   path="/tables/{table}/{uid}/delete",
-     *   tags={"tables"},
-     *   summary="delete object of specified table, also accept method: POST
-     *   See also /list for bulk delete by query.",
-     *   @OA\Parameter(
-     *     name="X-API-Key",
-     *     in="header",
-     *     description="api key",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="X-Tenant",
-     *     in="header",
-     *     description="tenant id",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="table",
-     *     in="path",
-     *     description="specified table name",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="uid",
-     *     in="path",
-     *     description="uid",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Response(
-     *     response=404,
-     *     description="object not found"
-     *   ),
-     *   @OA\Response(
-     *     response=422,
-     *     description="invalid table name"
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="deleted object"
-     *   )
-     * )
-     */
     public function delete(Request $request)
     {
         $table = $this->getTable();
@@ -231,93 +79,6 @@ trait ApiTableTrait
         return $this->rsp(isset($item) ? 200 : 404, $item);
     }
 
-    /**
-     * @OA\Get(
-     *   path="/tables/{table}/list",
-     *   tags={"tables"},
-     *   summary="search or delete a table, use DELETE http method to bulk delete",
-     *   @OA\Parameter(
-     *     name="X-API-Key",
-     *     in="header",
-     *     description="api key",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="X-Tenant",
-     *     in="header",
-     *     description="tenant id",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="table",
-     *     in="path",
-     *     description="specified table name",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="select",
-     *     in="query",
-     *     description="comma separated list of columns that you want to return",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="filter",
-     *     in="query",
-     *     description="array of column_name:operator:value to filter result with",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="array",
-     *       @OA\Items(type="string")
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="limit",
-     *     in="query",
-     *     description="limit the number of returned",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="integer"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="sort",
-     *     in="query",
-     *     description="array of column_name:asc/desc to sort result",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="array",
-     *       @OA\Items(type="string")
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Response(
-     *     response=422,
-     *     description="invalid table name"
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="Eloquent builder paginated json"
-     *   )
-     * )
-     */
     public function list(Request $request)
     {
         $table = $this->getTable();
@@ -328,51 +89,6 @@ trait ApiTableTrait
         return $qb->applyRequest($request);
     }
 
-    /**
-     * @OA\Get(
-     *   path="/tables/{table}/data",
-     *   tags={"tables"},
-     *   summary="jQuery DataTable endpoint",
-     *   @OA\Parameter(
-     *     name="X-API-Key",
-     *     in="header",
-     *     description="api key",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="X-Tenant",
-     *     in="header",
-     *     description="tenant id",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="table",
-     *     in="path",
-     *     description="specified table name",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Response(
-     *     response=422,
-     *     description="invalid table name"
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="jQuery DataTable json"
-     *   )
-     * )
-     */
     public function data(Request $request)
     {
         $table = $this->getTable();
@@ -382,61 +98,6 @@ trait ApiTableTrait
         return DataTables::of(\DB::table($item->getTable()))->make(true);
     }
 
-    /**
-     * @OA\Post(
-     *   path="/tables/{table}/{uid}/upsert",
-     *   tags={"tables"},
-     *   summary="upsert object of specified table",
-     *   @OA\Parameter(
-     *     name="X-API-Key",
-     *     in="header",
-     *     description="api key",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="X-Tenant",
-     *     in="header",
-     *     description="tenant id",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="table",
-     *     in="path",
-     *     description="specified table name",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="uid",
-     *     in="path",
-     *     description="uid",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Response(
-     *     response=422,
-     *     description="invalid table name"
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="new or updated object of specified table"
-     *   )
-     * )
-     */
     public function upsert(Request $request)
     {
         $table = $this->getTable();
@@ -523,66 +184,6 @@ trait ApiTableTrait
         }
     }
 
-    /**
-     * @OA\Post(
-     *   path="/tables/{table}/import",
-     *   tags={"tables"},
-     *   summary="import csv of object",
-     *   @OA\Parameter(
-     *     name="X-API-Key",
-     *     in="header",
-     *     description="api key",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="X-Tenant",
-     *     in="header",
-     *     description="tenant id",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="table",
-     *     in="path",
-     *     description="specified table name",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *       mediaType="multipart/form-data",
-     *       @OA\Schema(
-     *         @OA\Property(
-     *           description="csv file with header columns",
-     *           property="file",
-     *           type="string",
-     *           format="file",
-     *         ),
-     *         required={"file"}
-     *       )
-     *     )
-     *   ),
-     *   @OA\Response(
-     *     response="422",
-     *     description="import with error, rowno, and errored row"
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="imported list of uid(s)"
-     *   )
-     * )
-     */
     public function import(Request $request)
     {
         $table = $this->getTable();
@@ -653,48 +254,6 @@ trait ApiTableTrait
         return response()->json(["data" => $out, "job_id" => $jobid], 200);
     }
 
-    /**
-     * @OA\Post(
-     *   path="/tables/{table}/truncate",
-     *   tags={"tables"},
-     *   summary="delete everything from the table.  Why not?
-     *   Hint: this is why 'uid' is better than system 'id'.",
-     *   @OA\Parameter(
-     *     name="X-API-Key",
-     *     in="header",
-     *     description="api key",
-     *     required=false,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="X-Tenant",
-     *     in="header",
-     *     description="tenant id",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Parameter(
-     *     name="table",
-     *     in="path",
-     *     description="specified table name",
-     *     required=true,
-     *     @OA\Schema(
-     *       type="string"
-     *     ),
-     *     style="form"
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="nothing if success"
-     *   )
-     * )
-     */
     public function truncate(Request $request)
     {
         $table = $this->getTable();
@@ -704,6 +263,7 @@ trait ApiTableTrait
         \DB::table($item->getTable())->truncate();
         return response()->json();
     }
+// </end
 
     /**
      * helper method to return response

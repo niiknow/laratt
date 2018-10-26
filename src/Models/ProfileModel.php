@@ -70,12 +70,12 @@ class ProfileModel extends Authenticatable
 
         if (!Schema::hasTable($tableNew)) {
             Schema::create($tableNew, function (Blueprint $table) {
-                $table->bigIncrements('id');
+                $table->increments('id');
 
                 // client/consumer/external primary key
                 // this allow client to prevent duplicate
                 // for example, duplicate during bulk import
-                $table->string('uid')->unique();
+                $table->string('uid', 50)->unique();
 
                 // the list of fields below has been carefully
                 // choosen to support profile including
@@ -126,7 +126,7 @@ class ProfileModel extends Authenticatable
                 $table->string('occupation')->nullable();
                 $table->string('employer')->nullable();
 
-                $table->string('stripe_customer_id')->nullable();
+                $table->string('card_customer_id')->nullable();
                 $table->string('card_brand', 50)->nullable();
                 $table->string('card_last4', 4)->nullable();
 
