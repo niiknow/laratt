@@ -30,7 +30,7 @@ class ProfileModel extends Authenticatable
         'postal', 'city', 'state', 'country', 'email_list_optin_at',
         'is_retired_or_unemployed', 'occupation', 'employer',
 
-        'stripe_customer_id', 'card_brand', 'card_last4',
+        'card_customer_id', 'card_brand', 'card_last4',
         'data', 'meta', 'seen_at', 'access', 'job_id'
     ];
 
