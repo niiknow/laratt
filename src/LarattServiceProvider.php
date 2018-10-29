@@ -19,7 +19,7 @@ class LarattServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/laratt.php', 'laratt');
     }
 
-    public static function routeModel($modelName = 'profile')
+    public static function routeModel($modelName = 'Profile')
     {
         $model = mb_strtolower($modelName);
 
@@ -27,55 +27,55 @@ class LarattServiceProvider extends ServiceProvider
             ['get','delete'],
             $model . 's/list',
             $modelName . 'Controller@list'
-        )->name('laratt.'. $model .'s.list');
+        )->name('laratt.' . $model . 's.list');
 
         Route::match(
             ['get'],
             $model . 's/data',
-            ucFirst($modelName) . 'Controller@data'
-        )->name('laratt.'. $model .'s.data');
+            $modelName . 'Controller@data'
+        )->name('laratt.' . $model . 's.data');
 
         Route::match(
             ['post'],
-            $model .'s/create',
+            $model . 's/create',
             $modelName . 'Controller@create'
-        )->name('laratt.'. $model .'s.create');
+        )->name('laratt.' . $model . 's.create');
 
         Route::match(
             ['get'],
             $model .'s/{uid}/retrieve',
             $modelName . 'Controller@retrieve'
-        )->name('laratt.'. $model .'s.retrieve');
+        )->name('laratt.' . $model . 's.retrieve');
 
         Route::match(
             ['post'],
-            $model .'s/{uid}/upsert',
+            $model . 's/{uid}/upsert',
             $modelName . 'Controller@upsert'
-        )->name('laratt.'. $model .'s.upsert');
+        )->name('laratt.' . $model . 's.upsert');
 
         Route::match(
             ['post', 'delete'],
-            $model .'s/{uid}/delete',
+            $model . 's/{uid}/delete',
             $modelName . 'Controller@delete'
-        )->name('laratt.'. $model .'s.delete');
+        )->name('laratt.' . $model . 's.delete');
 
         Route::match(
             ['post'],
-            $model .'s/import',
+            $model . 's/import',
             $modelName . 'Controller@import'
-        )->name('laratt.'. $model .'s.import');
+        )->name('laratt.' . $model . 's.import');
 
         Route::match(
             ['post'],
-            $model .'s/truncate',
+            $model . 's/truncate',
             $modelName . 'Controller@truncate'
-        )->name('laratt.'. $model .'s.truncate');
+        )->name('laratt.' . $model . 's.truncate');
 
         Route::match(
             ['post'],
             'profiles/drop',
             $modelName . 'Controller@drop'
-        )->name('laratt.'. $model .'s.drop');
+        )->name('laratt.' . $model . 's.drop');
     }
 
     public static function routeTables($controller)
