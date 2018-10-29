@@ -5,6 +5,7 @@ namespace Niiknow\Laratt\Traits;
 use Niiknow\Laratt\Models\TableModel;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Validator;
 
@@ -53,11 +54,23 @@ trait ApiTableTrait
     }
 
 // <begin_controller_actions
+    /**
+     * create a record
+     *
+     * @param  Request $request http request
+     * @return object        the created object
+     */
     public function create(Request $request)
     {
         return $this->upsert($request, null);
     }
 
+    /**
+     * retrieve a record
+     *
+     * @param  string $uid     the object id
+     * @return object     the found object or 404
+     */
     public function retrieve()
     {
         $table = $this->getTable();
@@ -66,6 +79,13 @@ trait ApiTableTrait
         return $this->rsp(isset($item) ? 200 : 404, $item);
     }
 
+    /**
+     * delete a record
+     *
+     * @param  string  $uid     the object id
+     * @param  Request $request http request
+     * @return object     found and deleted, error, or 404
+     */
     public function delete(Request $request)
     {
         $table = $this->getTable();
@@ -79,6 +99,12 @@ trait ApiTableTrait
         return $this->rsp(isset($item) ? 200 : 404, $item);
     }
 
+    /**
+     * list record by query parameter
+     *
+     * @param  Request $request http request
+     * @return object     list result
+     */
     public function list(Request $request)
     {
         $table = $this->getTable();
@@ -89,6 +115,12 @@ trait ApiTableTrait
         return $qb->applyRequest($request);
     }
 
+    /**
+     * jQuery datatables endpoint
+     *
+     * @param  Request $request http request
+     * @return object     datatable result
+     */
     public function data(Request $request)
     {
         $table = $this->getTable();
@@ -98,6 +130,13 @@ trait ApiTableTrait
         return DataTables::of(\DB::table($item->getTable()))->make(true);
     }
 
+    /**
+     * update or insert a record
+     *
+     * @param  string  $uid     the object id
+     * @param  Request $request http request
+     * @return object     new record, updated record, or error
+     */
     public function upsert(Request $request)
     {
         $table = $this->getTable();
@@ -133,6 +172,14 @@ trait ApiTableTrait
         return $item;
     }
 
+    /**
+     * process the csv records
+     *
+     * @param  array  $csv   the csv rows data
+     * @param  array  &$data the result array
+     * @param  string $jobid the job id
+     * @return object        null or response object if error
+     */
     public function processCsv($csv, &$data, $jobid)
     {
         $rowno = 0;
@@ -184,6 +231,13 @@ trait ApiTableTrait
         }
     }
 
+    /**
+     * import a csv file
+     *
+     * @param  UploadedFile    $file    the file
+     * @param  Request         $request http request
+     * @return object           import result
+     */
     public function import(Request $request)
     {
         $table = $this->getTable();
@@ -254,6 +308,12 @@ trait ApiTableTrait
         return response()->json(["data" => $out, "job_id" => $jobid], 200);
     }
 
+    /**
+     * truncate a table
+     *
+     * @param  Request $request http request
+     * @return object           truncate success or error
+     */
     public function truncate(Request $request)
     {
         $table = $this->getTable();
@@ -261,6 +321,21 @@ trait ApiTableTrait
         $item->createTableIfNotExists(TenancyResolver::resolve(), $table);
 
         \DB::table($item->getTable())->truncate();
+        return response()->json();
+    }
+
+    /**
+     * drop a table
+     *
+     * @param  Request $request http request
+     * @return object           drop success or error
+     */
+    public function drop(Request $request)
+    {
+        $table = $this->getTable();
+        $item  = $this->getModel();
+        $item->dropTableIfExists(TenancyResolver::resolve(), $table);
+
         return response()->json();
     }
 // </end
