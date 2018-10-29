@@ -1,7 +1,7 @@
 # Laravel Table Tenancy (laratt)
 > Allow for multi-tenancy by using table prefix
 
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Build Status](https://travis-ci.org/niiknow/laratt.svg?branch=master)](https://travis-ci.org/niiknow/laratt) [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
 For documentation and testing, for now, see [laratt-api](https://github.com/niiknow/laratt-api) where this project was originally built and refactored.
 

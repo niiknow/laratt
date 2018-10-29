@@ -79,6 +79,6 @@ abstract class TestCase extends OrchestraTestCase
 
     public function getTempDirectory(): string
     {
-        return __DIR__ . '/tmp';
+        return __DIR__ . '/temp';
     }
 }
