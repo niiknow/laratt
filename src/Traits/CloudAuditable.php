@@ -60,8 +60,8 @@ trait CloudAuditable
             return false;
         }
 
-        $bucket = config('laratt.audit.bucket');
-        if (!isset($bucket) || strlen($bucket) <= 0) {
+        $disk = config('laratt.audit.disk');
+        if (!isset($disk) || strlen($disk) <= 0) {
             return false;
         }
 
@@ -221,13 +221,18 @@ trait CloudAuditable
             $body['info']     = $this->getCloudAuditInfo() ?: [];
         }
 
-        // store to s3
         $bucket = config('laratt.audit.bucket');
         if (!isset($bucket) || strlen($bucket) <= 0) {
             return $this;
         }
 
-        \Storage::disk('s3')
+        $disk = config('laratt.audit.disk');
+        if (!isset($disk) || strlen($disk) <= 0) {
+            return $this;
+        }
+
+        // right now, only support s3
+        \Storage::disk($disk)
             ->getDriver()
             ->getAdapter()
             ->getClient()

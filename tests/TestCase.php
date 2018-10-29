@@ -51,14 +51,15 @@ abstract class TestCase extends OrchestraTestCase
 
         $app['config']->set('laratt', [
             'resolver' => $this->getResolver(),
-            'audit' => [
-                'bucket' => null,
+            'audit'    => [
+                'disk'    => null,
+                'bucket'   => null,
                 'include' => [
-                    'table' => '.*',
+                    'table'  => '.*',
                     'tenant' => '.*'
                 ],
                 'exclude' => [
-                    'table' => '(log.*|cache)',
+                    'table'  => '(log.*|cache)',
                     'tenant' => null
                 ],
             ],
