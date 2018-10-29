@@ -4,3 +4,4 @@ vendor
 .phpunit.result.cache
 coverage/*
 .DS_Store
+tests/tmp/*
