@@ -59,21 +59,10 @@ class ProfileModel extends Authenticatable
 
     protected $hidden = ['no_audit'];
 
-    public function dropTableIfExists($tenant, $tableName = 'profile')
-    {
-        $tableNew = $this->setTableName($tenant, $tableName);
-
-        if (Schema::hasTable($tableNew)) {
-            Schema::dropIfExists($tableNew);
-
-            // clear cache
-            Cache::forget('tnc_'.$tableNew);
-        }
-    }
-
     public function createTableIfNotExists($tenant, $tableName = 'profile')
     {
-        $tableNew = $this->setTableName($tenant, $tableName);
+        $tableName = 'profile';
+        $tableNew  = $this->setTableName($tenant, $tableName);
 
         // only need to improve performance in prod
         if (config('env') === 'production' && \Cache::has('tnc_'.$tableNew)) {
