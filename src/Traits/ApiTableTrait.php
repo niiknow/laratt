@@ -52,7 +52,7 @@ trait ApiTableTrait
         return $table;
     }
 
-    public function getUid($request)
+    public function getUid(Request $request)
     {
         return $request->route('uid');
     }
@@ -95,7 +95,7 @@ trait ApiTableTrait
      * @param  string $uid     the object id
      * @return object     the found object or 404
      */
-    public function retrieve($request)
+    public function retrieve(Request $request)
     {
         $table = $this->getTable();
         $uid   = $this->getUid($request);
@@ -109,7 +109,7 @@ trait ApiTableTrait
      * @param  string  $uid     the object id
      * @return object     found and deleted, error, or 404
      */
-    public function delete($request)
+    public function delete(Request $request)
     {
         $table = $this->getTable();
         $uid   = $this->getUid($request);
