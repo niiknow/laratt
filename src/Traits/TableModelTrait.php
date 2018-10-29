@@ -2,6 +2,7 @@
 
 namespace Niiknow\Laratt\Traits;
 
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Config;
@@ -82,6 +83,6 @@ trait TableModelTrait
         Schema::dropIfExists($tableNew);
 
         // clear cache
-        Cache::forget('tnc_'.$tableNew);
+        \Cache::forget('tnc_'.$tableNew);
     }
 }

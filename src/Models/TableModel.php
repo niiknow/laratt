@@ -116,9 +116,9 @@ class TableModel extends Model
                 $table->string('gtins')->nullable()->index();
                 $table->string('brands')->nullable();
                 $table->string('cat1')->nullable()->index();
-                $table->string('cat2')->nullable()
-                $table->string('cat3')->nullable()
-                $table->string('cat4')->nullable()
+                $table->string('cat2')->nullable();
+                $table->string('cat3')->nullable();
+                $table->string('cat4')->nullable();
                 $table->string('map_coords')->nullable(); // hot map coordinates
 
                 $table->timestamps();
