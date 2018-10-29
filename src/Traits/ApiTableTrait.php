@@ -43,7 +43,7 @@ trait ApiTableTrait
         // length must be greater than 3 and less than 30
         // reserved tables: profile, user, recipe
         $rules = [
-            'table' => 'required|regex:/[a-z0-9]{3,30}/|not_in:profile,user,recipe'
+            'table' => 'required|regex:/[a-z0-9]{3,30}/|not_in:profile,user,recipe,tables'
         ];
 
         $this->getValidationFactory()
