@@ -17,11 +17,8 @@
   Note that specifying any file or directory path
   on the command line will ignore all file tags.
   -->
-  <file>api</file>
-  <file>app</file>
+  <file>src</file>
   <file>config</file>
-  <file>public</file>
-  <file>resources</file>
   <file>tests</file>
 
   <!--

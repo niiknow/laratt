@@ -2,3 +2,6 @@ build
 composer.lock
 vendor
 .phpunit.result.cache
+temp/*
+coverage/*
+.DS_Store

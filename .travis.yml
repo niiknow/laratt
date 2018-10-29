@@ -5,20 +5,9 @@ php:
   - 7.2
   - 7.3
 
-sudo: false
-
-cache:
-  directories:
-    - $HOME/.composer/cache
-
-env:
-  matrix:
-    - COMPOSER_FLAGS="--prefer-lowest"
-    - COMPOSER_FLAGS=""
-
 before_script:
-  - travis_retry composer self-update
-  - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction --prefer-dist
+  - composer self-update
+  - composer install --prefer-source --no-interaction --dev
+  - composer dump-autoload
 
-script:
-  - phpunit --coverage-text --coverage-clover=coverage.clover
+script: phpunit

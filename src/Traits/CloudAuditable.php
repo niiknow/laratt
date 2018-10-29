@@ -60,6 +60,11 @@ trait CloudAuditable
             return false;
         }
 
+        $bucket = config('laratt.audit.bucket');
+        if (!isset($bucket) || strlen($bucket) <= 0) {
+            return false;
+        }
+
         $iten = config('laratt.audit.include.tenant');
         $itab = config('laratt.audit.include.table');
         if (!isset($iten) || !isset($itab)) {

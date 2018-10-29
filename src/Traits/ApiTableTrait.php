@@ -41,21 +41,19 @@ trait ApiTableTrait
         $table = request()->route('table');
 
         // length must be greater than 3 and less than 30
-        // reserved tables: profile, user, recipe
+        // reserved tables: profile, user, recipe, tables
         $rules = [
             'table' => 'required|regex:/[a-z0-9]{3,30}/|not_in:profile,user,recipe,tables'
         ];
 
-        $this->getValidationFactory()
-             ->make(['table' => $table], $rules)
-             ->validate();
+        Validator::make(['table' => $table], $rules)->validate();
 
         return $table;
     }
 
-    public function getUid()
+    public function getUid($request)
     {
-        return request()->route('uid');
+        return $request->route('uid');
     }
 
     /**
@@ -96,12 +94,12 @@ trait ApiTableTrait
      * @param  string $uid     the object id
      * @return object     the found object or 404
      */
-    public function retrieve()
+    public function retrieve($request)
     {
         $table = $this->getTable();
-        $uid   = $this->getUid();
+        $uid   = $this->getUid($request);
         $item  = $this->getModel()->tableFind($uid, $table);
-        return $this->rsp(isset($item) ? 200 : 404, $item);
+        return isset($item) ? $item : $this->rsp(404);
     }
 
     /**
@@ -110,17 +108,17 @@ trait ApiTableTrait
      * @param  string  $uid     the object id
      * @return object     found and deleted, error, or 404
      */
-    public function delete()
+    public function delete($request)
     {
         $table = $this->getTable();
-        $uid   = $this->getUid();
+        $uid   = $this->getUid($request);
         $item  = $this->getModel()->tableFind($uid, $table);
 
         if ($item && !$item->delete()) {
             throw new LarattException(__('exceptions.tables.delete'));
         }
 
-        return $this->rsp(isset($item) ? 200 : 404, $item);
+        return isset($item) ? $item : $this->rsp(404);
     }
 
     /**
@@ -163,11 +161,16 @@ trait ApiTableTrait
     public function upsert(Request $request)
     {
         $table = $this->getTable();
-        $uid   = $this->getUid();
+        $uid   = $this->getUid($request);
 
-        $rules = array();
-        $rules = $this->vrules;
-        $this->validate($request, $rules);
+        $rules     = array();
+        $rules     = $this->vrules;
+        $inputs    = $request->all();
+        $validator = Validator::make($inputs, $rules);
+
+        if ($validator->fails()) {
+            return $this->rst(422, $validator->errors());
+        }
 
         $data   = $request->all();
         $inputs = array();
@@ -266,7 +269,12 @@ trait ApiTableTrait
         $table = $this->getTable();
 
         // validate that the file import is required
-        $this->validate($request, ['file' => 'required']);
+        $inputs    = $request->all();
+        $validator = Validator::make($inputs, ['file' => 'required']);
+
+        if ($validator->fails()) {
+            return $this->rst(422, $validator->errors());
+        }
 
         $file = $request->file('file')->openFile();
         $csv  = \League\Csv\Reader::createFromFileObject($file)
