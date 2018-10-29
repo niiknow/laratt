@@ -53,6 +53,31 @@ trait ApiTableTrait
         return $table;
     }
 
+    public function getUid()
+    {
+        return request()->route('uid');
+    }
+
+    /**
+     * helper method to return response
+     *
+     * @param  integer $code the http response code
+     * @param  object  $rsp  the response object
+     * @return Response       the http response
+     */
+    public function rsp($code, $rsp = null)
+    {
+        if ($code == 404) {
+            return response()->json([ "error" => "not found" ], 404);
+        }
+
+        if ($code == 422) {
+            return response()->json([ "error" => $rsp ]);
+        }
+
+        return response()->json($rsp, $code);
+    }
+
 // <begin_controller_actions
     /**
      * create a record
@@ -74,7 +99,7 @@ trait ApiTableTrait
     public function retrieve()
     {
         $table = $this->getTable();
-        $uid   = $request->route('uid');
+        $uid   = $this->getUid();
         $item  = $this->getModel()->tableFind($uid, $table);
         return $this->rsp(isset($item) ? 200 : 404, $item);
     }
@@ -83,13 +108,12 @@ trait ApiTableTrait
      * delete a record
      *
      * @param  string  $uid     the object id
-     * @param  Request $request http request
      * @return object     found and deleted, error, or 404
      */
-    public function delete(Request $request)
+    public function delete()
     {
         $table = $this->getTable();
-        $uid   = $request->route('uid');
+        $uid   = $this->getUid();
         $item  = $this->getModel()->tableFind($uid, $table);
 
         if ($item && !$item->delete()) {
@@ -118,10 +142,9 @@ trait ApiTableTrait
     /**
      * jQuery datatables endpoint
      *
-     * @param  Request $request http request
      * @return object     datatable result
      */
-    public function data(Request $request)
+    public function data()
     {
         $table = $this->getTable();
         $item  = $this->getModel();
@@ -140,7 +163,7 @@ trait ApiTableTrait
     public function upsert(Request $request)
     {
         $table = $this->getTable();
-        $uid   = $request->route('uid');
+        $uid   = $this->getUid();
 
         $rules = array();
         $rules = $this->vrules;
@@ -209,22 +232,22 @@ trait ApiTableTrait
 
             // capture and provide better error message
             if ($validator->fails()) {
-                return response()->json(
-                    [
+                return $this->rsp(
+                    422,
+                    [                   [
                         "error" => $validator->errors(),
                         "rowno" => $rowno,
                         "row" => $inputs
-                    ],
-                    422
+                    ]
                 );
             }
 
             $data[] = $inputs;
             if ($rowno > $limit) {
                 // we must improve a limit due to memory/resource restriction
-                return response()->json(
-                    ['error' => "Each import must be less than $limit records"],
-                    422
+                return $this->rsp(
+                    422,
+                    ['error' => "Each import must be less than $limit records"]
                 );
             }
             $rowno += 1;
@@ -284,14 +307,14 @@ trait ApiTableTrait
 
                 // something went wrong, error out
                 if (!$item->save()) {
-                    response()->json(
+                    $this->rsp(
+                        422,
                         [
                             "error" => "Error while attempting to import row",
                             "rowno" => $rowno,
                             "row" => $item,
                             "job_id" => $jobid
-                        ],
-                        422
+                        ]
                     );
 
                     // throw exception to rollback transaction
@@ -305,58 +328,36 @@ trait ApiTableTrait
 
         // import success response
         $out = array_pluck($rst, 'uid');
-        return response()->json(["data" => $out, "job_id" => $jobid], 200);
+        return $this->rsp(200, ["data" => $out, "job_id" => $jobid]);
     }
 
     /**
      * truncate a table
      *
-     * @param  Request $request http request
      * @return object           truncate success or error
      */
-    public function truncate(Request $request)
+    public function truncate()
     {
         $table = $this->getTable();
         $item  = $this->getModel();
         $item->createTableIfNotExists(TenancyResolver::resolve(), $table);
 
         \DB::table($item->getTable())->truncate();
-        return response()->json();
+        return $this->rsp(200);
     }
 
     /**
      * drop a table
      *
-     * @param  Request $request http request
      * @return object           drop success or error
      */
-    public function drop(Request $request)
+    public function drop()
     {
         $table = $this->getTable();
         $item  = $this->getModel();
         $item->dropTableIfExists(TenancyResolver::resolve(), $table);
 
-        return response()->json();
+        return $this->rsp(200);
     }
 // </end
-
-    /**
-     * helper method to return response
-     *
-     * @param  integer $code the http response code
-     * @param  object  $rsp  the response object
-     * @return Response       the http response
-     */
-    public function rsp($code, $rsp = null)
-    {
-        if ($code == 404) {
-            return response()->json([ "error" => "not found" ], 404);
-        }
-
-        if ($code == 422) {
-            return response()->json([ "error" => $rsp ]);
-        }
-
-        return response()->json($rsp, $code);
-    }
 }
