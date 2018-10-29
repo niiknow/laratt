@@ -253,6 +253,9 @@ class ProfileControllerTest extends TestCase
         $count = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest_profile')->count();
         $this->assertSame($expected, $count, "Has right count.");
 
+        // drop table
+        $c->drop($req);
+
         echo " {$this->green}[OK]{$this->white}\r\n";
     }
 }

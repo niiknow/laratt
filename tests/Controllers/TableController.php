@@ -2,9 +2,19 @@
 
 namespace Niiknow\Laratt\Tests\Controllers;
 
+use Niiknow\Laratt\Traits\ApiTableTrait;
+use Niiknow\Laratt\Models\TableModel;
+
 class TableController
 {
     use ApiTableTrait;
+
+    public $tableName;
+
+    public function getTable()
+    {
+        return $this->tableName;
+    }
 
     /**
      * @var array

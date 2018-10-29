@@ -15,6 +15,7 @@ use Yajra\DataTables\DataTables;
 use Niiknow\Laratt\RequestQueryBuilder;
 
 use Niiknow\Laratt\TenancyResolver;
+use Niiknow\Laratt\LarattException;
 
 trait ApiTableTrait
 {
