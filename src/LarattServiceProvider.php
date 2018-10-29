@@ -2,6 +2,7 @@
 
 namespace Niiknow\Laratt;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class LarattServiceProvider extends ServiceProvider

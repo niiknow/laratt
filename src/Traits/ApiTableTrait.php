@@ -234,7 +234,7 @@ trait ApiTableTrait
             if ($validator->fails()) {
                 return $this->rsp(
                     422,
-                    [                   [
+                    [
                         "error" => $validator->errors(),
                         "rowno" => $rowno,
                         "row" => $inputs
