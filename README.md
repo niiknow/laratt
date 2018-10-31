@@ -15,8 +15,18 @@ composer require niiknow/laratt
 php artisan vendor:publish --provider="Niiknow\Laratt\LarattServiceProvider"
 ```
 
+** Features **
+- [x] Dynamic table as `tenant_tablename`
+- [x] Tenant resolution use `X-Tenant` header by default; though, it is customizable by providing a static function for `resolver` config.
+- [x] A generic Controller Trait that provide simple and flexible CRUD (create, retrieve, update, delete) REST endpoint.
+- [x] Simple query and bulk delete `/list` REST endpoint.
+- [x] jQuery DataTables as `/data` endpoint with [laravel-datatables](https://github.com/yajra/laravel-datatables) 
+- [x] Pre-defined structured schema for `ProfileModel`
+- [x] Schedulable and ecommerce schema type for `TableModel`
+- [x] Cloud auditable (s3 backed) of individual record transaction.  This allow you to trigger aws lambda on some event instead of having to create scheduled jobs.
+- [x] Being able to include and exclude table from auditable - so you don't have to audit things like when you're using it for logging, caching, or when client doesn't need it for some particular reason. 
 
-**API Schema**
+## API Schema
 The image below is from our Swagger documentation of the [laratt-api](https://github.com/niiknow/laratt-api) project.
 ![](https://raw.githubusercontent.com/niiknow/laratt/master/api.png?raw=true)
 
@@ -28,7 +38,7 @@ Also note that there are two ids: `id` and `uid`. `id` is internal to **laratt**
 
 Providing a `uid` allow the API `update` to effectively act as an `merge/upsert` operation.  This mean that, if you call update with a `uid`, it will `update` if the record is found, otherwise `insert` a new record.
 
-- `/list` endpoint is use for query and bulk delete, see: [Query Syntax](#query-syntax)
+- `/list` endpoint is use for query and bulk `DELETE`, see: [Query Syntax](#query-syntax)
 - `/data` endpoint is use for returning jQuery DataTables format using [laravel-datatables](https://github.com/yajra/laravel-datatables).
 - `/import` bulk import is csv to allow for bigger import.  Up to 10000 records instead of some small number like 100 for Azure Table Storage (also see admin config to adjust).  This allow for efficiency of smaller file and quicker file transfer/upload.
 - `/truncate` truncate all data from table.
@@ -37,7 +47,7 @@ Providing a `uid` allow the API `update` to effectively act as an `merge/upsert`
 What about your own/custom schema?  See example of our [Profile Schema](https://github.com/niiknow/laratt/blob/master/src/Models/ProfileModel.php#L78)
 
 ## Query-Syntax
-This library provide simple query endpoint for search and bulk delete: `api/v1/profiles/list` or `api/v1/tables/{table}/list` - see **CRUD Format** above.
+This library provide simple query endpoint for search and bulk delete: `api/v1/profiles/list` or `api/v1/tables/{table}/list`
 
 ### Limiting
 
