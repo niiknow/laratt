@@ -15,7 +15,7 @@ composer require niiknow/laratt
 php artisan vendor:publish --provider="Niiknow\Laratt\LarattServiceProvider"
 ```
 
-** Features **
+## Features
 - [x] Dynamic table as `tenant_tablename`
 - [x] Tenant resolution use `X-Tenant` header by default; though, it is customizable by providing a static function for `resolver` config.
 - [x] A generic Controller Trait that provide simple and flexible CRUD (create, retrieve, update, delete) REST endpoint.
