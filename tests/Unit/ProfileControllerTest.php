@@ -75,7 +75,7 @@ class ProfileControllerTest extends TestCase
             ->andReturn($pd);
 
         // test: update
-        $rstr = $c->upsert($req);
+        $rstr = $c->update($req);
         // var_dump($rstr);
         $this->assertInstanceOf(\Niiknow\Laratt\Models\ProfileModel::class, $rstr);
 

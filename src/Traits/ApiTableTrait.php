@@ -86,7 +86,7 @@ trait ApiTableTrait
      */
     public function create(Request $request)
     {
-        return $this->upsert($request, null);
+        return $this->update($request, null);
     }
 
     /**
@@ -159,7 +159,7 @@ trait ApiTableTrait
      * @param  Request $request http request
      * @return object     new record, updated record, or error
      */
-    public function upsert(Request $request)
+    public function update(Request $request)
     {
         $table = $this->getTable();
         $uid   = $this->getUid($request);
@@ -193,7 +193,7 @@ trait ApiTableTrait
         }
 
         if (!$item->save()) {
-            throw new LarattException(__('exceptions.tables.upsert'));
+            throw new LarattException(__('exceptions.tables.update'));
         }
 
         return $item;
@@ -202,17 +202,17 @@ trait ApiTableTrait
     /**
      * process the csv records
      *
-     * @param  array  $csv   the csv rows data
-     * @param  array  &$data the result array
-     * @param  string $jobid the job id
+     * @param  array  $csv      the csv rows data
+     * @param  array  &$data    the result array
+     * @param  string $importid the importid id
      * @return object        null or response object if error
      */
-    public function processCsv($csv, &$data, $jobid)
+    public function processCsv($csv, &$data, $importid)
     {
         $rowno = 0;
         $limit = config('laratt.import_limit', 999);
         foreach ($csv as $row) {
-            $inputs = ['job_id' => $jobid];
+            $inputs = ['import_id' => $importid];
 
             // undot the csv array
             foreach ($row as $key => $value) {
@@ -282,8 +282,8 @@ trait ApiTableTrait
             ->setHeaderOffset(0);
 
         $data  = [];
-        $jobid = (string) Str::uuid();
-        $rst   = $this->processCsv($csv, $data, $jobid);
+        $importid = (string) Str::uuid();
+        $rst   = $this->processCsv($csv, $data, $importid);
         if ($rst) {
             return $rst;
         }
@@ -293,7 +293,7 @@ trait ApiTableTrait
         $item->createTableIfNotExists(TenancyResolver::resolve());
 
         // wrap import in a transaction
-        \DB::transaction(function () use ($data, &$rst, $jobid, $table) {
+        \DB::transaction(function () use ($data, &$rst, $importid, $table) {
             $rowno = 0;
             foreach ($data as $inputs) {
                 // get uid
@@ -322,7 +322,7 @@ trait ApiTableTrait
                             "error" => "Error while attempting to import row",
                             "rowno" => $rowno,
                             "row" => $item,
-                            "job_id" => $jobid
+                            "import_id" => $importid
                         ]
                     );
 
@@ -337,7 +337,7 @@ trait ApiTableTrait
 
         // import success response
         $out = array_pluck($rst, 'uid');
-        return $this->rsp(200, ["data" => $out, "job_id" => $jobid]);
+        return $this->rsp(200, ["data" => $out, "import_id" => $importid]);
     }
 
     /**

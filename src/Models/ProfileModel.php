@@ -22,7 +22,7 @@ class ProfileModel extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'uid', 'email', 'email_verified_at', 'password', 'password_updated_at', 'image_url',
+        'uid', 'email', 'email_verified_at', 'password', 'image_url',
         'phone_country_code', 'phone', 'group', 'tfa_type', 'authy_id', 'authy_status',
         'google_tfa_secret', 'tfa_code', 'tfa_exp_at',
 
@@ -31,7 +31,7 @@ class ProfileModel extends Authenticatable
         'is_retired_or_unemployed', 'occupation', 'employer',
 
         'card_customer_id', 'card_brand', 'card_last4',
-        'data', 'meta', 'seen_at', 'access', 'job_id'
+        'data', 'meta', 'seen_at', 'access', 'import_id'
     ];
 
     /**
@@ -137,7 +137,7 @@ class ProfileModel extends Authenticatable
                 $table->mediumText('meta')->nullable();
                 // extra data/attribute about the user
                 $table->mediumText('data')->nullable();
-                $table->uuid('job_id')->nullable()->index();
+                $table->uuid('import_id')->nullable()->index();
             });
 
             // cache database check for 12 hours or half a day

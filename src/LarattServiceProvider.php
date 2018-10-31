@@ -19,7 +19,7 @@ class LarattServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/laratt.php', 'laratt');
     }
 
-    public static function routeModel($modelName = 'Profile')
+    public static function routeModel($modelName = 'Profile', $prefix = 'laratt')
     {
         $model = mb_strtolower($modelName);
 
@@ -27,19 +27,19 @@ class LarattServiceProvider extends ServiceProvider
             ['get','delete'],
             $model . 's/list',
             $modelName . 'Controller@list'
-        )->name('laratt.' . $model . 's.list');
+        )->name("$prefix.$model" . 's.list');
 
         Route::match(
             ['get'],
             $model . 's/data',
             $modelName . 'Controller@data'
-        )->name('laratt.' . $model . 's.data');
+        )->name("$prefix.$model" . 's.data');
 
         Route::match(
             ['post'],
             $model . 's/create',
             $modelName . 'Controller@create'
-        )->name('laratt.' . $model . 's.create');
+        )->name("$prefix.$model" . 's.create');
 
         Route::match(
             ['get'],
@@ -49,90 +49,90 @@ class LarattServiceProvider extends ServiceProvider
 
         Route::match(
             ['post'],
-            $model . 's/{uid}/upsert',
-            $modelName . 'Controller@upsert'
-        )->name('laratt.' . $model . 's.upsert');
+            $model . 's/{uid}/update',
+            $modelName . 'Controller@update'
+        )->name("$prefix.$model" . 's.update');
 
         Route::match(
             ['post', 'delete'],
             $model . 's/{uid}/delete',
             $modelName . 'Controller@delete'
-        )->name('laratt.' . $model . 's.delete');
+        )->name("$prefix.$model" . 's.delete');
 
         Route::match(
             ['post'],
             $model . 's/import',
             $modelName . 'Controller@import'
-        )->name('laratt.' . $model . 's.import');
+        )->name("$prefix.$model" . 's.import');
 
         Route::match(
             ['post'],
             $model . 's/truncate',
             $modelName . 'Controller@truncate'
-        )->name('laratt.' . $model . 's.truncate');
+        )->name("$prefix.$model" . 's.truncate');
 
         Route::match(
             ['post'],
             'profiles/drop',
             $modelName . 'Controller@drop'
-        )->name('laratt.' . $model . 's.drop');
+        )->name("$prefix.$model" . 's.drop');
     }
 
-    public static function routeTables($controller)
+    public static function routeTables($controller, $prefix = 'laratt')
     {
         // table stuff
         Route::match(
             ['get','delete'],
             'tables/list',
             $controller . '@list'
-        )->name('laratt.tables.list');
+        )->name($prefix . '.tables.list');
 
         Route::match(
             ['get'],
             'tables/data',
             $controller . '@data'
-        )->name('laratt.tables.data');
+        )->name($prefix . '.tables.data');
 
         Route::match(
             ['post'],
             'tables/{table}/create',
             $controller . '@create'
-        )->name('laratt.tables.create');
+        )->name($prefix . '.tables.create');
 
         Route::match(
             ['get'],
             'tables/{table}/{uid}/retrieve',
             $controller . '@retrieve'
-        )->name('laratt.tables.retrieve');
+        )->name($prefix . '.tables.retrieve');
 
         Route::match(
             ['post'],
-            'tables/{table}/{uid}/upsert',
-            $controller . '@upsert'
-        )->name('laratt.tables.upsert');
+            'tables/{table}/{uid}/update',
+            $controller . '@update'
+        )->name($prefix . '.tables.update');
 
         Route::match(
             ['post', 'delete'],
             'tables/{table}/{uid}/delete',
             $controller . '@delete'
-        )->name('laratt.tables.delete');
+        )->name($prefix . '.tables.delete');
 
         Route::match(
             ['post'],
             'tables/{table}/import',
             $controller . '@import'
-        )->name('laratt.tables.import');
+        )->name($prefix . '.tables.import');
 
         Route::match(
             ['post'],
             'tables/{table}/truncate',
             $controller . '@truncate'
-        )->name('laratt.tables.truncate');
+        )->name($prefix . '.tables.truncate');
 
         Route::match(
             ['post'],
             'tables/{table}/drop',
             $controller . '@drop'
-        )->name('laratt.tables.drop');
+        )->name($prefix . '.tables.drop');
     }
 }

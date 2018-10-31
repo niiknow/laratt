@@ -25,7 +25,7 @@ class TableModel extends Model
         'week_schedules', 'analytic_code', 'imp_pixel', 'msrp', 'price',
         'sale_price', 'sale_qty', 'skus', 'gtins', 'brands', 'cat1',
         'cat2', 'cat3', 'cat4', 'map_coords', 'clk_url', 'content',
-        'data', 'meta', 'var', 'job_id'
+        'data', 'meta', 'var', 'import_id'
     ];
 
     /**
@@ -82,7 +82,7 @@ class TableModel extends Model
                 $table->string('uid', 50)->unique();
 
                 // example, name: home slider
-                $table->string('name')->nullable();
+                $table->string('name')->nullable()->index();
                 // label should be hidden from user, viewable by admin
                 // example: location x, y, and z home slider
                 $table->string('label')->nullable();
@@ -134,7 +134,7 @@ class TableModel extends Model
                 $table->mediumText('data')->nullable();
                 // variant color, size, price, etc...
                 $table->mediumText('var')->nullable();
-                $table->uuid('job_id')->nullable()->index();
+                $table->uuid('import_id')->nullable()->index();
             });
 
             // cache database check for 12 hours or half a day
