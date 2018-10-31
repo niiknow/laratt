@@ -17,6 +17,7 @@ php artisan vendor:publish --provider="Niiknow\Laratt\LarattServiceProvider"
 
 
 **API Schema**
+The image below is from our Swagger documentation of the [laratt-api](https://github.com/niiknow/laratt-api) project.
 ![](https://raw.githubusercontent.com/niiknow/laratt/master/api.png?raw=true)
 
 [Table Schema](https://github.com/niiknow/laratt/blob/master/src/Models/TableModel.php#L77)
