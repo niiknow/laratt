@@ -38,7 +38,7 @@ class TableModel extends Model
         'sale_price' => 'integer',
         'meta' => 'array',
         'data' => 'array',
-        'var' => 'array',
+        'var'  => 'array',
     ];
 
     /**
@@ -52,8 +52,6 @@ class TableModel extends Model
         'created_at',
         'updated_at',
     ];
-
-    protected $hidden = ['no_audit'];
 
     public function setStartedAtAttribute($value)
     {

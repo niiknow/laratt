@@ -312,7 +312,7 @@ trait ApiTableTrait
                 }
 
                 // disable audit for bulk import
-                $item->no_audit = true;
+                $item->setNoAudit(true);
 
                 // something went wrong, error out
                 if (!$item->save()) {

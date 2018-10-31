@@ -19,6 +19,8 @@ use Niiknow\Laratt\TenancyResolver;
  */
 trait TableModelTrait
 {
+    protected $no_audit = false;
+
     public static function bootTableModelTrait()
     {
         static::creating(function ($model) {
@@ -27,6 +29,49 @@ trait TableModelTrait
                 $model->uid = (string) Str::uuid();
             }
         });
+    }
+
+    /**
+     * get no audit
+     *
+     * @return boolean true if not audit
+     */
+    public function getNoAudit()
+    {
+        return $this->no_audit;
+    }
+
+    /**
+     * Set no audit attribute
+     *
+     * @param  boolean  $no_audit
+     * @return $this
+     */
+    public function setNoAudit($no_audit)
+    {
+        $this->no_audit = $no_audit;
+
+        return $this;
+    }
+
+    /**
+     * get no_audit property
+     *
+     * @return boolean  if enable audit
+     */
+    public function getNoAuditAttribute()
+    {
+        return $this->getNoAudit();
+    }
+
+    /**
+     * set no_audit property
+     *
+     * @return boolean  if enable audit
+     */
+    public function setNoAuditAttribute($value)
+    {
+        $this->setNoAudit($value);
     }
 
     public function tableCreate($table, $tenant = null)

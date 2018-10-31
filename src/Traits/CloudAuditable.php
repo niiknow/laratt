@@ -14,8 +14,6 @@ use Carbon\Carbon;
  */
 trait CloudAuditable
 {
-    protected $no_audit = false;
-
     public static function bootCloudAuditable()
     {
         static::created(function ($auditable) {
@@ -56,7 +54,7 @@ trait CloudAuditable
      */
     public function canCloudAudit()
     {
-        if ($this->no_audit) {
+        if ($this->getNoAudit()) {
             return false;
         }
 
@@ -249,25 +247,5 @@ trait CloudAuditable
             );
 
         return $this;
-    }
-
-    /**
-     * get no_audit property
-     *
-     * @return boolean  if enable audit
-     */
-    public function getNoAuditAttribute()
-    {
-        return $this->no_audit;
-    }
-
-    /**
-     * set no_audit property
-     *
-     * @return boolean  if enable audit
-     */
-    public function setNoAuditAttribute($value)
-    {
-        $this->no_audit = $value;
     }
 }

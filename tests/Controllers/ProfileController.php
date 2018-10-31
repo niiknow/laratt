@@ -24,7 +24,6 @@ class ProfileController
         'tfa_type' => 'nullable|in:off,email,sms,call',
         'authy_id' => 'nullable|string|max:190',
         'authy_status' => 'nullable|string|max:190',
-        'google_tfa_secret' => 'nullable|string|max:190',
         'tfa_code' => 'nullable|string|max:190',
         'tfa_exp_at' => 'nullable|date',
 
