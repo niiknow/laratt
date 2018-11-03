@@ -1,9 +1,9 @@
 # Laravel Table Tenancy (laratt)
 > Allow for multi-tenancy by using table prefix
 
-[![Build Status](https://travis-ci.org/niiknow/laratt.svg?branch=master)](https://travis-ci.org/niiknow/laratt) [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Build Status](https://travis-ci.org/niiknow/laratt.svg?branch=master)](https://travis-ci.org/niiknow/laratt)[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
-For usage, see [laratt-api](https://github.com/niiknow/laratt-api) where this project was originally built and refactored.
+Also see [laratt-api](https://github.com/niiknow/laratt-api) where this project was originally built and refactored.
 
 **Install**:
 ```
@@ -26,6 +26,8 @@ php artisan vendor:publish --provider="Niiknow\Laratt\LarattServiceProvider"
 - [x] Cloud auditable (s3 backed) of individual record transaction.  This allow you to trigger aws lambda on some event instead of having to create scheduled jobs.
 - [x] Being able to include and exclude table from auditable - so you don't have to audit things like when you're using it for logging, caching, or when client doesn't need it for some particular reason. 
 
+**CONS** It doesn't support table relationship.
+
 ## API Schema
 The image below is from our Swagger documentation of the [laratt-api](https://github.com/niiknow/laratt-api) project.
 ![](https://raw.githubusercontent.com/niiknow/laratt/master/api.png?raw=true)
@@ -47,7 +49,7 @@ Providing a `uid` allow the API `update` to effectively act as an `merge/upsert`
 What about your own/custom schema?  See example of our [Profile Schema](https://github.com/niiknow/laratt/blob/master/src/Models/ProfileModel.php#L78)
 
 ## Query-Syntax
-This library provide simple query endpoint for search and bulk delete: `api/v1/profiles/list` or `api/v1/tables/{table}/list`
+This library provide simple query endpoint for search and bulk delete: `api/v1/profile/list` or `api/v1/tables/{table}/list`
 
 ### Limiting
 
