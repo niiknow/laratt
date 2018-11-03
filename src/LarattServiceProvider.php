@@ -25,57 +25,57 @@ class LarattServiceProvider extends ServiceProvider
 
         Route::match(
             ['get','delete'],
-            $model . 's/list',
+            $model . '/list',
             $modelName . 'Controller@list'
-        )->name("$prefix.$model" . 's.list');
+        )->name("$prefix.$model" . '.list');
 
         Route::match(
-            ['get'],
-            $model . 's/data',
+            ['get', 'post'],
+            $model . '/data',
             $modelName . 'Controller@data'
-        )->name("$prefix.$model" . 's.data');
+        )->name("$prefix.$model" . '.data');
 
         Route::match(
             ['post'],
-            $model . 's/create',
+            $model . '/create',
             $modelName . 'Controller@create'
-        )->name("$prefix.$model" . 's.create');
+        )->name("$prefix.$model" . '.create');
 
         Route::match(
-            ['get'],
-            $model .'s/{uid}/retrieve',
+            ['get', 'post'],
+            $model .'/{uid}/retrieve',
             $modelName . 'Controller@retrieve'
-        )->name('laratt.' . $model . 's.retrieve');
+        )->name('laratt.' . $model . '.retrieve');
 
         Route::match(
             ['post'],
-            $model . 's/{uid}/update',
+            $model . '/{uid}/update',
             $modelName . 'Controller@update'
-        )->name("$prefix.$model" . 's.update');
+        )->name("$prefix.$model" . '.update');
 
         Route::match(
             ['post', 'delete'],
-            $model . 's/{uid}/delete',
+            $model . '/{uid}/delete',
             $modelName . 'Controller@delete'
-        )->name("$prefix.$model" . 's.delete');
+        )->name("$prefix.$model" . '.delete');
 
         Route::match(
             ['post'],
-            $model . 's/import',
+            $model . '/import',
             $modelName . 'Controller@import'
-        )->name("$prefix.$model" . 's.import');
+        )->name("$prefix.$model" . '.import');
 
         Route::match(
             ['post'],
-            $model . 's/truncate',
+            $model . '/truncate',
             $modelName . 'Controller@truncate'
-        )->name("$prefix.$model" . 's.truncate');
+        )->name("$prefix.$model" . '.truncate');
 
         Route::match(
             ['post'],
-            'profiles/drop',
+            $model . '/drop',
             $modelName . 'Controller@drop'
-        )->name("$prefix.$model" . 's.drop');
+        )->name("$prefix.$model" . '.drop');
     }
 
     public static function routeTables($controller, $prefix = 'laratt')
@@ -88,7 +88,7 @@ class LarattServiceProvider extends ServiceProvider
         )->name($prefix . '.tables.list');
 
         Route::match(
-            ['get'],
+            ['get', 'post'],
             'tables/data',
             $controller . '@data'
         )->name($prefix . '.tables.data');
@@ -100,7 +100,7 @@ class LarattServiceProvider extends ServiceProvider
         )->name($prefix . '.tables.create');
 
         Route::match(
-            ['get'],
+            ['get', 'post'],
             'tables/{table}/{uid}/retrieve',
             $controller . '@retrieve'
         )->name($prefix . '.tables.retrieve');

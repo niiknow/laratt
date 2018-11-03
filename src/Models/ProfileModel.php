@@ -144,8 +144,8 @@ class ProfileModel extends Authenticatable
                 $table->uuid('import_id')->nullable()->index();
             });
 
-            // cache database check for 12 hours or half a day
-            \Cache::add('tnc_'.$tableNew, 'true', 60*12);
+            // cache database check for 45 minutes
+            \Cache::add('tnc_'.$tableNew, 'true', 45);
         }
 
         return $tableNew;
@@ -189,7 +189,6 @@ class ProfileModel extends Authenticatable
     public function getTfaCode()
     {
         $value = $this->attributes['tfa_code'];
-        // return \Crypt::decryptString($value);
         return $value;
     }
 

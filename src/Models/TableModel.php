@@ -135,8 +135,8 @@ class TableModel extends Model
                 $table->uuid('import_id')->nullable()->index();
             });
 
-            // cache database check for 12 hours or half a day
-            \Cache::add($tableNew, 'true', 60*12);
+            // cache database check for 45 minutes
+            \Cache::add($tableNew, 'true', 45);
         }
 
         return $tableNew;

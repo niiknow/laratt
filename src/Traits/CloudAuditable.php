@@ -167,7 +167,7 @@ trait CloudAuditable
 
         if ($this->canCloudAudit()) {
             $table    = $this->getTable();
-            $filename = "$uid/$table/index";
+            $filename = "$table/$uid/index";
             return $this->cloudAuditWrite($action, $log, null, $filename);
         }
     }
