@@ -79,7 +79,7 @@ class ProfileControllerTest extends TestCase
         // var_dump($rstr);
         $this->assertInstanceOf(\Niiknow\Laratt\Models\ProfileModel::class, $rstr);
 
-        $item = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest_profile')->where('email', $pd['email'])->first();
+        $item = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest$profile')->where('email', $pd['email'])->first();
         $this->assertTrue(isset($item));
         $this->assertSame('Niiknow', $item->last_name);
 
@@ -89,7 +89,7 @@ class ProfileControllerTest extends TestCase
         // var_dump($rstr);
         $this->assertInstanceOf(\Niiknow\Laratt\Models\ProfileModel::class, $rstr);
 
-        $item = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest_profile')->where('email', $pd['email'])->first();
+        $item = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest$profile')->where('email', $pd['email'])->first();
         $this->assertTrue(!isset($item));
 
         // truncate table
@@ -121,7 +121,7 @@ class ProfileControllerTest extends TestCase
         }
 
         // test: list all
-        $items = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest_profile')->get();
+        $items = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest$profile')->get();
         $this->assertSame($expected, count($items));
 
         $req = $this->getRequest('profile');
@@ -176,7 +176,7 @@ class ProfileControllerTest extends TestCase
         $body = $rst->toArray();
         $this->assertSame(2, $body['current_page'], "Correctly parse page parameter.");
         $this->assertSame(5, count($body['data']), "Has right count.");
-        $expected = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest_profile')->count() - 8;
+        $expected = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest$profile')->count() - 8;
 
         // test: list filter with delete
         $req = $this->getRequest('profile');
@@ -201,7 +201,7 @@ class ProfileControllerTest extends TestCase
 
         $rst = $c->list($req);
 
-        $count = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest_profile')->count();
+        $count = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest$profile')->count();
         $this->assertSame($expected, $count, "Has right count.");
 
         // truncate table
@@ -250,7 +250,7 @@ class ProfileControllerTest extends TestCase
             ->andReturn($file);
 
         $rst   = $c->import($req);
-        $count = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest_profile')->count();
+        $count = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest$profile')->count();
         $this->assertSame($expected, $count, "Has right count.");
 
         // drop table

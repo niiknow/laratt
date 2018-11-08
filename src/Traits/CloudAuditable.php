@@ -70,7 +70,7 @@ trait CloudAuditable
         }
 
         $tn    = $this->getTable();
-        $parts = explode("_", $tn);
+        $parts = explode("$", $tn);
         if (!preg_match("/$iten/", $parts[0])
             || !preg_match("/$itab/", $parts[1])) {
             return false;
@@ -101,7 +101,7 @@ trait CloudAuditable
     {
         // $user    = null;
         $tn      = $this->getTable();
-        $parts   = explode("_", $tn);
+        $parts   = explode("$", $tn);
         $request = request();
         $route   = $request->route();
         $now     = Carbon::now('UTC');

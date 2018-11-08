@@ -80,7 +80,7 @@ class TableControllerTest extends TestCase
         // var_dump($rstr);
         $this->assertInstanceOf(\Niiknow\Laratt\Models\TableModel::class, $rstr);
 
-        $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest_boom')->where('name', $pd['name'])->first();
+        $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest$boom')->where('name', $pd['name'])->first();
         $this->assertTrue(isset($item));
         $this->assertSame('Noogen', $item->name);
 
@@ -90,7 +90,7 @@ class TableControllerTest extends TestCase
         // var_dump($rstr);
         $this->assertInstanceOf(\Niiknow\Laratt\Models\TableModel::class, $rstr);
 
-        $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest_boom')->where('name', $pd['name'])->first();
+        $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest$boom')->where('name', $pd['name'])->first();
         $this->assertTrue(!isset($item));
 
         // truncate table

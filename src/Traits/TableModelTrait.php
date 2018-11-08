@@ -107,7 +107,7 @@ trait TableModelTrait
             $tenant = TenancyResolver::resolve();
         }
 
-        $newName = TenancyResolver::slug($tenant) . '_' . TenancyResolver::slug($tableName);
+        $newName = TenancyResolver::slug($tenant) . '$' . TenancyResolver::slug($tableName);
 
         $this->table = $newName;
 

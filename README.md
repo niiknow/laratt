@@ -16,7 +16,8 @@ php artisan vendor:publish --provider="Niiknow\Laratt\LarattServiceProvider"
 ```
 
 ## Features
-- [x] Dynamic table as `tenant_tablename`
+- [x] Use special character `$` for tenant and table separator.  Most database allow for this character.
+- [x] Dynamic table as `tenant$table_name`
 - [x] Tenant resolution use `X-Tenant` header by default; though, it is customizable by providing a static function for `resolver` config.
 - [x] A generic Controller Trait that provide simple and flexible CRUD (create, retrieve, update, delete) REST endpoint.
 - [x] Simple query and bulk delete `/list` REST endpoint.
@@ -34,7 +35,7 @@ The image below is from our Swagger documentation of the [laratt-api](https://gi
 
 [Table Schema](https://github.com/niiknow/laratt/blob/master/src/Models/TableModel.php#L77)
 
-Special multi-tables endpoint @ `/api/v1/tables/{table}`; where `{table}` is the table name you want to create.  `{table}` must be all lower cased alphanumeric with mininum of 3 characters to 30 max.  Example, let say `x-tenant: clienta` and `{table} = product`, then the resulting table will be `clienta_product`.
+Special multi-tables endpoint @ `/api/v1/tables/{table}`; where `{table}` is the table name you want to create.  `{table}` must be all lower cased alphanumeric and underscore with mininum of 3 characters to 30 max.  Example, let say `x-tenant: clienta` and `{table} = product`, then the resulting table will be `clienta$product`.
 
 Also note that there are two ids: `id` and `uid`. `id` is internal to **laratt**.  You should be using `uid` for all operations.  `uid` is an auto-generated guid, if none is provide during `insert`.
 
