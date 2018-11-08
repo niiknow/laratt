@@ -103,6 +103,7 @@ trait CloudAuditable
         $tn      = $this->getTable();
         $parts   = explode("_", $tn);
         $request = request();
+        $route   = $request->route();
         $now     = Carbon::now('UTC');
         $memuse  = round(memory_get_peak_usage(true) / 1024 / 1024, 1);
         $body    = [
@@ -119,9 +120,9 @@ trait CloudAuditable
             'uname'        => php_uname(),
         ];
 
-        if (isset($request)) {
+        if ($route !== null) {
             // $user         = $request->user();
-            $route_params = $request->route()->parameters();
+            $route_params = $route->parameters();
 
             $body = array_merge($body, [
                 // 'user'          => $user,
