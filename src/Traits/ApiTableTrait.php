@@ -141,15 +141,27 @@ trait ApiTableTrait
     /**
      * jQuery datatables endpoint
      *
+     * @param  Request $request http request
      * @return object     datatable result
      */
-    public function data()
+    public function data(Request $request)
     {
         $table = $this->getTable();
         $item  = $this->getModel();
         $item->createTableIfNotExists(TenancyResolver::resolve(), $table);
+        $dt     = DataTables::of(\DB::table($item->getTable()));
+        $action = $request->query('action');
 
-        return DataTables::of(\DB::table($item->getTable()))->make(true);
+        if (isset($action)) {
+            // validate action must be in xlsx, ods, csv
+            $request->validate(['action' => 'required|in:xlsx,ods,csv']);
+            $dt    = $dt->skipPaging();
+            $query = $dt->getFilteredQuery();
+            $file  = $table . '_' . time() . '.' . $action;
+            return (new FastExcel($dt->get()))->download('file.xlsx');
+        }
+
+        return $dt->make(true);
     }
 
     /**
@@ -281,9 +293,9 @@ trait ApiTableTrait
         $csv  = \League\Csv\Reader::createFromFileObject($file)
             ->setHeaderOffset(0);
 
-        $data  = [];
+        $data     = [];
         $importid = (string) Str::uuid();
-        $rst   = $this->processCsv($csv, $data, $importid);
+        $rst      = $this->processCsv($csv, $data, $importid);
         if ($rst) {
             return $rst;
         }

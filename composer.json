@@ -19,8 +19,9 @@
     "require": {
         "php": ">=7.1",
         "laravel/framework": "~5.5.0|~5.6.0|~5.7.0",
-        "league/flysystem": "^1.0.27",
         "league/csv": "^9.1",
+        "league/flysystem": "^1.0.27",
+        "rap2hpoutre/fast-excel": "^0.11.0",
         "yajra/laravel-datatables-oracle": "~8.0"
     },
     "require-dev": {
