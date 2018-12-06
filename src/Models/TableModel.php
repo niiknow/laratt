@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Niiknow\Laratt\Traits\CloudAuditable;
 use Niiknow\Laratt\Traits\TableModelTrait;
+use Niiknow\Laratt\Traits\SchedulableTrait;
 
 class TableModel extends Model
 {
