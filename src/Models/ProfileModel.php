@@ -135,13 +135,14 @@ class ProfileModel extends Authenticatable
                 $table->string('card_brand', 50)->nullable();
                 $table->string('card_last4', 4)->nullable();
 
-                $table->timestamps();
-
                 // extra meta to store things like social provider
                 $table->mediumText('meta')->nullable();
                 // extra data/attribute about the user
                 $table->mediumText('data')->nullable();
                 $table->uuid('import_id')->nullable()->index();
+
+                $table->timestamps();
+                $table->rememberToken();
             });
 
             // cache database check for 45 minutes
