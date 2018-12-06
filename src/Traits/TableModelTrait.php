@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Config;
 
 use Illuminate\Support\Str;
 
-use Carbon\Carbon;
-
 use Niiknow\Laratt\TenancyResolver;
 
 /**

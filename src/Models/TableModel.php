@@ -9,11 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 use Niiknow\Laratt\Traits\CloudAuditable;
 use Niiknow\Laratt\Traits\TableModelTrait;
 
-use Carbon\Carbon;
-
 class TableModel extends Model
 {
     use CloudAuditable,
+        SchedulableTrait,
         TableModelTrait;
 
     /**
@@ -47,21 +46,9 @@ class TableModel extends Model
      * @var array
      */
     protected $dates = [
-        'started_at' => 'datetime:Y-m-d',
-        'ended_at' => 'datetime',
         'created_at',
-        'updated_at',
+        'updated_at'
     ];
-
-    public function setStartedAtAttribute($value)
-    {
-        $this->attributes['started_at'] = Carbon::parse($value)->startOfDay();
-    }
-
-    public function setEndedAtAttribute($value)
-    {
-        $this->attributes['ended_at'] = Carbon::parse($value)->endOfDay();
-    }
 
     public function createTableIfNotExists($tenant, $tableName)
     {
