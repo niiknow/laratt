@@ -316,6 +316,7 @@ trait ApiTableTrait
 
                     // if we cannot find item, insert
                     if (!isset($item)) {
+                        $item = $this->getModel($inputs);
                         $item = $item->tableCreate($table);
                     }
                 } else {
