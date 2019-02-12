@@ -112,11 +112,11 @@ trait TableModelTrait
         return $newName;
     }
 
-    public function setUid($value)
+    public function setUidAttribute($value)
     {
         // we have to do this because we use uid for audit
         // a slug is already an extremely flexible id
-        $this->attributes['uid'] = \Str::slug($value);
+        $this->attributes['uid'] = Str::slug($value);
     }
 
     public function dropTableIfExists($tenant, $tableName)
