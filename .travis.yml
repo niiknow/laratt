@@ -10,4 +10,4 @@ before_script:
   - composer install --prefer-source --no-interaction --dev
   - composer dump-autoload
 
-script: phpunit
+script: ./vendor/bin/phpunit
