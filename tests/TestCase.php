@@ -10,7 +10,7 @@ abstract class TestCase extends OrchestraTestCase
     protected $green  = "\e[0;32m";
     protected $white  = "\e[0;37m";
 
-    public function setUp()
+    protected function setUp()
     {
         parent::setUp();
 
