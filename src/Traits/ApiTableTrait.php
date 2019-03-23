@@ -148,8 +148,13 @@ trait ApiTableTrait
         $table = $this->getTable();
         $item  = $this->getModel();
         $item->createTableIfNotExists(TenancyResolver::resolve(), $table);
-        $dt     = DataTables::of(\DB::table($item->getTable()));
-        $action = $request->query('action');
+        $dt            = DataTables::of(\DB::table($item->getTable()));
+        $action        = $request->query('action');
+        $escapeColumns = $request->query('escapeColumns');
+
+        if (!isset($encode)) {
+            $dt = $dt->escapeColumns([]);
+        }
 
         if (isset($action)) {
             // validate action must be in xlsx, ods, csv
