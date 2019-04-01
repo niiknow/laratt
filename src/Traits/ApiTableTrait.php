@@ -51,9 +51,14 @@ trait ApiTableTrait
         return $table;
     }
 
-    public function getUid(Request $request)
+    protected function getUid(Request $request)
     {
         return $request->route('uid');
+    }
+
+    protected function getUidField()
+    {
+        return 'uid';
     }
 
     /**
@@ -162,7 +167,7 @@ trait ApiTableTrait
             $dt    = $dt->skipPaging();
             $query = $dt->getFilteredQuery();
             $file  = $table . '_' . time() . '.' . $action;
-            return (new FastExcel($dt->get()))->download('file.xlsx');
+            return (new FastExcel($query->get()))->download($file);
         }
 
         return $dt->make(true);
@@ -197,8 +202,8 @@ trait ApiTableTrait
 
         $item = $this->getModel($inputs);
         if (isset($uid)) {
-            $input['uid'] = $uid;
-            $item         = $item->tableFill($uid, $inputs, $table);
+            $input[$this->getUidField()] = $uid;
+            $item                        = $item->tableFill($uid, $inputs, $table);
 
             // if we cannot find item, do insert
             if (!isset($item)) {
@@ -313,11 +318,11 @@ trait ApiTableTrait
             $rowno = 0;
             foreach ($data as $inputs) {
                 // get uid
-                $uid  = isset($inputs['uid']) ? $inputs['uid'] : null;
+                $uid  = isset($inputs[$this->getUidField()]) ? $inputs[$this->getUidField()] : null;
                 $item = $this->getModel($inputs);
                 if (isset($uid)) {
-                    $inputs['uid'] = $uid;
-                    $item          = $item->tableFill($uid, $inputs, $table);
+                    $inputs[$this->getUidField()] = $uid;
+                    $item                         = $item->tableFill($uid, $inputs, $table);
 
                     // if we cannot find item, insert
                     if (!isset($item)) {
@@ -353,7 +358,7 @@ trait ApiTableTrait
         });
 
         // import success response
-        $out = array_pluck($rst, 'uid');
+        $out = array_pluck($rst, $this->getUidField());
         return $this->rsp(200, ["data" => $out, "import_id" => $importid]);
     }
 
