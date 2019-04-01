@@ -21,7 +21,7 @@
         "laravel/framework": "~5.5.0|~5.6.0|~5.7.0|~5.8.0",
         "league/csv": "^9.2",
         "league/flysystem": "^1.0.50",
-        "rap2hpoutre/fast-excel": "^1.2.1",
+        "maatwebsite/excel": "^3.1",
         "yajra/laravel-datatables-oracle": "~9.0"
     },
     "require-dev": {

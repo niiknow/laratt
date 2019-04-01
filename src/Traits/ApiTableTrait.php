@@ -15,6 +15,7 @@ use Niiknow\Laratt\RequestQueryBuilder;
 
 use Niiknow\Laratt\TenancyResolver;
 use Niiknow\Laratt\LarattException;
+use Niiknow\Laratt\TableExporter;
 
 trait ApiTableTrait
 {
@@ -167,7 +168,10 @@ trait ApiTableTrait
             $dt    = $dt->skipPaging();
             $query = $dt->getFilteredQuery();
             $file  = $table . '_' . time() . '.' . $action;
-            return (new FastExcel($query->get()))->download($file);
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new TableExporter($query, $item),
+                $file
+            );
         }
 
         return $dt->make(true);
