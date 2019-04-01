@@ -167,7 +167,7 @@ trait ApiTableTrait
             $request->validate(['action' => 'required|in:xlsx,ods,csv']);
             $dt    = $dt->skipPaging();
             $query = $dt->getFilteredQuery();
-            $file  = $table . '_' . time() . '.' . $action;
+            $file  = $table . '-' . time() . '.' . $action;
             return \Maatwebsite\Excel\Facades\Excel::download(
                 new TableExporter($query, $item),
                 $file

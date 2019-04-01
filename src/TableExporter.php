@@ -14,31 +14,22 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
 
     protected $query;
 
-    public function __construct($query, $mainClass)
+    protected $acols;
+
+    public function __construct($query, $model)
     {
         // only fillable are exportable
-        $obj  = is_string($mainClass) ? new $mainClass() : $mainClass;
-        $cols = $obj->getFillable();
+        $cols  = $model->getFillable();
+        $acols = [];
 
-        if (method_exists($obj, 'getExportable')) {
-            $myCols = $obj->getExportable();
-            $cols   = [];
-
-            foreach($myCols as $k => $v) {
-                if (strpos($v, '\\') === false) {
-                    $cols[] = $v;
-                } else {
-                    $subObj  = new $v();
-                    $subCols = $subObj->getFillable();
-                    foreach($subCols as $vv) {
-                        $cols[] = "$k.$vv";
-                    }
-                }
-            }
+        if (method_exists($model, 'getExportable')) {
+            list ($cols, $acols) = $model->getExportable();
         }
 
-        $this->query    = $query;
+        $this->query    = new \Illuminate\Database\Eloquent\Builder($query);
+        $this->query->setModel($model);
         $this->headings = $cols;
+        $this->acols    = $acols;
     }
 
     public function headings(): array
@@ -49,7 +40,30 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
     public function map($item): array
     {
         $rst   = [];
-        $attrs = array_dot($item->toArray());
+        $data  = $item->toArray();
+
+        // use acols to determine if data will be array or string
+        foreach($this->acols as $k => $class) {
+            $da = $item->{$k};
+
+            // string array are pipe delimited
+            if (strpos($class, 'StringArray:') !== false) {
+                $sep = str_replace('StringArray:', '', $class);
+                $da  = implode($sep, $da);
+            } elseif (is_object($da)) {
+                // object get convert to array
+                $da = json_decode(json_encode($da), true);
+            }
+
+            // if it's an object array then convert to string
+            if ($class === 'ObjectArray' && !is_string($da)) {
+                $da = json_encode($da);
+            }
+
+            $data[$k] = $da;
+        }
+
+        $attrs = array_dot($data);
         foreach ($this->headings as $key) {
             if (isset($attrs[$key])) {
                 $rst[] = $attrs[$key];
