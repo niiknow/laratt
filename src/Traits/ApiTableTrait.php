@@ -163,9 +163,13 @@ trait ApiTableTrait
         }
 
         if (isset($action)) {
+            // disable paging if length is not set
+            if (!isset($request->query('length'))) {
+                $dt = $dt->skipPaging();
+            }
+
             // validate action must be in xlsx, ods, csv
             $request->validate(['action' => 'required|in:xlsx,ods,csv']);
-            $dt    = $dt->skipPaging();
             $query = $dt->getFilteredQuery();
             $file  = $table . '-' . time() . '.' . $action;
             return \Maatwebsite\Excel\Facades\Excel::download(
