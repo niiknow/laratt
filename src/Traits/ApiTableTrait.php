@@ -164,7 +164,7 @@ trait ApiTableTrait
 
         if (isset($action)) {
             // disable paging if length is not set
-            if (!isset($request->query('length'))) {
+            if (!$request->query('length')) {
                 $dt = $dt->skipPaging();
             }
 
