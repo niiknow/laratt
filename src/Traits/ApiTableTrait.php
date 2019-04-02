@@ -250,7 +250,12 @@ trait ApiTableTrait
                     $cell = (string)$cell;
                 }
 
-                if ($cell === '' || $cell === 'null') {
+                $cv = trim(mb_strtolower($cell));
+
+                if (empty($cv)
+                    || $cv === 'nil'
+                    || $cv === 'null'
+                    || $cv === 'undefined') {
                     $cell = null;
                 } elseif (is_numeric($cell)) {
                     $cell = $cell + 0;
