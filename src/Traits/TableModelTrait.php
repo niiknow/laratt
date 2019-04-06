@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Config;
 
 use Illuminate\Support\Str;
+use Validator;
+
+use League\Csv\Reader;
 
 use Niiknow\Laratt\TenancyResolver;
 
@@ -127,5 +130,167 @@ trait TableModelTrait
 
         // clear cache
         \Cache::forget('tnc_'.$tableNew);
+    }
+
+
+    /**
+     * process the csv records
+     *
+     * @param  array  $csv      the csv rows data
+     * @param  array  &$data    the result array
+     * @param  string $importid the importid id
+     * @param  array  $vrules   the validation rules
+     * @return object        null or response object if error
+     */
+    public function processCsv($csv, &$data, $importid, $vrules)
+    {
+        $rowno = 0;
+        $limit = config('laratt.import_limit', 999);
+        foreach ($csv as $row) {
+            $inputs = [];
+
+            // undot the csv array
+            foreach ($row as $key => $value) {
+                $cell = $value;
+                if (!is_string($cell)) {
+                    $cell = (string)$cell;
+                }
+                $cv = trim(mb_strtolower($cell));
+
+                if ($cv === 'null'
+                    || $cv === 'nil'
+                    || $cv === 'undefined') {
+                    $cell = null;
+                } elseif (!is_string($value) && is_numeric($cv)) {
+                    $cell = $cell + 0;
+                }
+
+                // undot array
+                array_set($inputs, $key, $cell);
+            }
+
+            // validate data
+            $validator = Validator::make($inputs, $vrules);
+
+            // capture and provide better error message
+            if ($validator->fails()) {
+                return [
+                    'code'  => 422,
+                    'error' => $validator->errors(),
+                    'rowno' => $rowno,
+                    'row'   => $inputs
+                ];
+            }
+
+            $data[] = $inputs;
+            if ($rowno > $limit) {
+                // we must improve a limit due to memory/resource restriction
+                return [
+                    'code'  => 422,
+                    'error' => "Each import must be less than $limit records"
+                ];
+            }
+            $rowno += 1;
+        }
+
+        return ['code' => 200];
+    }
+
+    public function saveImportItem(&$inputs, $idField = 'uid', $table)
+    {
+        $model = get_class($this);
+        $stat  = 'insert';
+        $id    = isset($inputs[$idField]) ? $inputs[$idField] : null;
+        $item  = new $model($inputs);
+        $item->tableCreate($table);
+
+        if (isset($id)) {
+            $inputs[$idField] = $id;
+
+            $item = $this->where($idField, $id)->first();
+
+            // if we cannot find item, do insert
+            if (isset($item)) {
+                $item->fill($inputs);
+                $stat = 'update';
+            } else {
+                $item = new $model($inputs);
+            }
+
+            if (!isset($item[$idField])) {
+                $stat = 'skip';
+                return [$stat, null];
+            }
+        }
+
+        // disable audit for bulk import
+        $item->setNoAudit(true);
+
+        return [$stat, $item->save() ? $item : null];
+    }
+
+    public function saveImport(&$data, $idField = 'uid', $table)
+    {
+        // $start_memory = memory_get_usage();
+        // \Log::info("importing: $start_memory");
+
+        $inserted = [];
+        $updated  = [];
+        $skipped  = [];
+
+        // wrap import in a transaction
+        \DB::beginTransaction();
+        try {
+            // start at 1 because header row is at 0
+            $rowno = 1;
+            foreach ($data as $inputs) {
+                list($stat, $item) = $this->saveImportItem($inputs, $idField, $table);
+
+                if (null === $item && $stat !== 'skip') {
+                    // rollback transaction
+                    \DB::rollback();
+
+                    return [
+                        'code'      => 422,
+                        'error'     => 'Error while attempting to import row',
+                        'rowno'     => $rowno,
+                        'row'       => $inputs,
+                        'import_id' => $importid
+                    ];
+                }
+
+                if ($stat === 'insert') {
+                    $inserted[] = $item->{$idField};
+                } elseif ($stat === 'update') {
+                    $updated[] = $item->{$idField};
+                } else {
+                    $skipped[] = $item->{$idField};
+                }
+
+                $rowno += 1;
+                $item   = null;
+
+                // $used_memory = (memory_get_usage() - $start_memory) / 1024 / 1024;
+                // $peek_memory = memory_get_peak_usage(true) / 1024 / 1024;
+                // \Log::info("import #$rowno: $used_memory $peek_memory");
+            }
+
+            \DB::commit();
+        } catch (\Exception $e) {
+            \DB::rollback();
+            $message = $e->getMessage();
+            \Log::error('API import error: ' . $message);
+            return [
+                'code'  => 422,
+                'error' => $message
+            ];
+        }
+
+        return [
+            'code' => 200,
+            'inserted' => $inserted,
+            'updated' => $updated,
+            'skipped' => $skipped
+        ];
     }
 }

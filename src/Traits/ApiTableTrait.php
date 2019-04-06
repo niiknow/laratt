@@ -229,70 +229,6 @@ trait ApiTableTrait
     }
 
     /**
-     * process the csv records
-     *
-     * @param  array  $csv      the csv rows data
-     * @param  array  &$data    the result array
-     * @param  string $importid the importid id
-     * @return object        null or response object if error
-     */
-    public function processCsv($csv, &$data, $importid)
-    {
-        $rowno = 0;
-        $limit = config('laratt.import_limit', 999);
-        foreach ($csv as $row) {
-            $inputs = ['import_id' => $importid];
-
-            // undot the csv array
-            foreach ($row as $key => $value) {
-                $cell = $value;
-                if (!is_string($cell)) {
-                    $cell = (string)$cell;
-                }
-
-                $cv = trim(mb_strtolower($cell));
-
-                if (empty($cv)
-                    || $cv === 'nil'
-                    || $cv === 'null'
-                    || $cv === 'undefined') {
-                    $cell = null;
-                } elseif (is_numeric($cell)) {
-                    $cell = $cell + 0;
-                }
-
-                // undot array
-                array_set($inputs, $key, $cell);
-            }
-
-            // validate data
-            $validator = Validator::make($inputs, $this->vrules);
-
-            // capture and provide better error message
-            if ($validator->fails()) {
-                return $this->rsp(
-                    422,
-                    [
-                        "error" => $validator->errors(),
-                        "rowno" => $rowno,
-                        "row" => $inputs
-                    ]
-                );
-            }
-
-            $data[] = $inputs;
-            if ($rowno > $limit) {
-                // we must improve a limit due to memory/resource restriction
-                return $this->rsp(
-                    422,
-                    ['error' => "Each import must be less than $limit records"]
-                );
-            }
-            $rowno += 1;
-        }
-    }
-
-    /**
      * import a csv file
      *
      * @param  UploadedFile    $file    the file
@@ -311,68 +247,51 @@ trait ApiTableTrait
             return $this->rst(422, $validator->errors());
         }
 
+        // $start_memory = memory_get_usage();
+        // \Log::info("import - processing: $start_memory");
+
         $file = $request->file('file')->openFile();
         $csv  = \League\Csv\Reader::createFromFileObject($file)
             ->setHeaderOffset(0);
 
         $data     = [];
         $importid = (string) Str::uuid();
-        $rst      = $this->processCsv($csv, $data, $importid);
-        if ($rst) {
-            return $rst;
+        $model    = $this->getModel()->tableCreate($table);
+
+        $rsp = $model->processCsv(
+            $csv,
+            $data,
+            $importid,
+            $this->vrules
+        );
+
+        // $used_memory = (memory_get_usage() - $start_memory) / 1024 / 1024;
+        // \Log::info("import - before save: $used_memory");
+
+        if ($rsp['code'] === 422) {
+            return $this->rsp(422, $rsp);
         }
 
-        $rst  = array();
-        $item = $this->getModel();
-        $item->createTableIfNotExists(TenancyResolver::resolve());
+        $rsp = $model->saveImport(
+            $data,
+            $this->getUidField(),
+            $table
+        );
 
-        // wrap import in a transaction
-        \DB::transaction(function () use ($data, &$rst, $importid, $table) {
-            $rowno = 0;
-            foreach ($data as $inputs) {
-                // get uid
-                $uid  = isset($inputs[$this->getUidField()]) ? $inputs[$this->getUidField()] : null;
-                $item = $this->getModel($inputs);
-                if (isset($uid)) {
-                    $inputs[$this->getUidField()] = $uid;
-                    $item                         = $item->tableFill($uid, $inputs, $table);
+        // $used_memory = (memory_get_usage() - $start_memory) / 1024 / 1024;
+        // \Log::info("import - after save: $used_memory");
 
-                    // if we cannot find item, insert
-                    if (!isset($item)) {
-                        $item = $this->getModel($inputs);
-                        $item = $item->tableCreate($table);
-                    }
-                } else {
-                    $item = $item->tableCreate($table);
-                }
-
-                // disable audit for bulk import
-                $item->setNoAudit(true);
-
-                // something went wrong, error out
-                if (!$item->save()) {
-                    $this->rsp(
-                        422,
-                        [
-                            "error" => "Error while attempting to import row",
-                            "rowno" => $rowno,
-                            "row" => $item,
-                            "import_id" => $importid
-                        ]
-                    );
-
-                    // throw exception to rollback transaction
-                    throw new LarattException(__('exceptions.import'));
-                }
-
-                $rst[]  = $item->toArray();
-                $rowno += 1;
-            }
-        });
+        if ($rsp['code'] === 422) {
+            return $this->rsp(422, $rsp);
+        }
 
         // import success response
-        $out = array_pluck($rst, $this->getUidField());
-        return $this->rsp(200, ["data" => $out, "import_id" => $importid]);
+        return $this->rsp(200, [
+            'inserted'  => $rsp['inserted'],
+            'updated'   => $rsp['updated'],
+            'skipped'   => $rsp['skipped'],
+            'import_id' => $importid
+        ]);
     }
 
     /**
