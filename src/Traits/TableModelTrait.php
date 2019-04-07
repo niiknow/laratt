@@ -82,20 +82,13 @@ trait TableModelTrait
         return $this;
     }
 
-    public function tableFill($uid, $data, $table, $tenant = null)
-    {
-        $item = $this->tableFind($uid, $table);
-        if (isset($item)) {
-            $item->fill($data);
-        }
-        return $item;
-    }
-
     public function tableFind($uid, $table, $tenant = null)
     {
         $this->createTableIfNotExists($tenant, $table);
-        $tn   = $this->getTable();
-        $item = $this->query()->from($tn)->where('uid', $uid)->first();
+        $tn    = $this->getTable();
+        $query = $this->query();
+        $query = $query->setModel($this);
+        $item  = $query->where('uid', $uid)->first();
         if (isset($item)) {
             $item->setTableName($tenant, $table);
         }
@@ -196,7 +189,7 @@ trait TableModelTrait
         return ['code' => 200];
     }
 
-    public function saveImportItem(&$inputs, $idField = 'uid', $table)
+    public function saveImportItem(&$inputs, $table, $idField = 'uid')
     {
         $model = get_class($this);
         $stat  = 'insert';
@@ -229,7 +222,7 @@ trait TableModelTrait
         return [$stat, $item->save() ? $item : null];
     }
 
-    public function saveImport(&$data, $idField = 'uid', $table)
+    public function saveImport(&$data, $table, $idField = 'uid')
     {
         // $start_memory = memory_get_usage();
         // \Log::info("importing: $start_memory");

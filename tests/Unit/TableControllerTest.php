@@ -45,7 +45,11 @@ class TableControllerTest extends TestCase
             ->with('uid')
             ->andReturn(null);
 
-        $req->shouldReceive('all')
+        $req->shouldReceive('input')
+            ->with('uid')
+            ->andReturn(null);
+
+        $req->shouldReceive('except')
             ->andReturn($pd);
 
         // test: create
@@ -72,7 +76,7 @@ class TableControllerTest extends TestCase
             ->andReturn($rstc->uid);
 
         $pd['name'] = 'Noogen';
-        $req->shouldReceive('all')
+        $req->shouldReceive('except')
             ->andReturn($pd);
 
         // test: update

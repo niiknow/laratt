@@ -11,7 +11,7 @@ class TableController
 
     public $tableName;
 
-    public function getTable()
+    public function getTableName()
     {
         return $this->tableName;
     }

@@ -5,6 +5,8 @@ namespace Niiknow\Laratt\Tests\Controllers;
 use Niiknow\Laratt\Traits\ApiTableTrait;
 use Niiknow\Laratt\Models\ProfileModel;
 
+use Niiknow\Laratt\TenancyResolver;
+
 class ProfileController
 {
     use ApiTableTrait;
@@ -13,10 +15,10 @@ class ProfileController
      * @var array
      */
     protected $vrules = [
-        'email' => 'required|email|max:190',
-        'email_verified_at' => 'nullable|date',
-        'seen_at' => 'nullable|date',
-        'image_url' => 'nullable|url|max:190',
+        'email'              => 'required|email|max:190',
+        'email_verified_at'  => 'nullable|date',
+        'seen_at'            => 'nullable|date',
+        'image_url'          => 'nullable|url|max:190',
         'phone_country_code' => 'nullable|regex:/^(\+?\d{1,3}|\d{1,4})$/',
         'phone' => 'nullable|regex:/\d{7,20}+/',
         'group' => 'nullable|string|max:190',
@@ -49,13 +51,18 @@ class ProfileController
         'meta.*' => 'nullable'
     ];
 
-    public function getTable()
+    public function getTableName()
     {
         return 'profile';
     }
 
     public function getModel($attrs = [])
     {
-        return new ProfileModel($attrs);
+        $item = new ProfileModel($attrs);
+        $item->createTableIfNotExists(
+            TenancyResolver::resolve(),
+            'profile'
+        );
+        return $item;
     }
 }

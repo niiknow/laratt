@@ -33,18 +33,22 @@ class ProfileControllerTest extends TestCase
         echo "\n\r{$this->yellow}    should create, update, and delete profile...";
 
         $c   = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
-        $req = $this->getRequest('profile', null);
+        $req = $this->getRequest('profile');
         $pd  = [
             'email'         => 'tom@noogen.com',
             'first_name'    => 'Tom',
             'last_name'     => 'Noogen'
         ];
 
-        $req->shouldReceive('uid')
+        $req->shouldReceive('route')
             ->with('uid')
             ->andReturn(null);
 
-        $req->shouldReceive('all')
+        $req->shouldReceive('input')
+            ->with('uid')
+            ->andReturn(null);
+
+        $req->shouldReceive('except')
             ->andReturn($pd);
 
         // test: create
@@ -71,7 +75,7 @@ class ProfileControllerTest extends TestCase
             ->andReturn($rstc->uid);
 
         $pd['last_name'] = 'Niiknow';
-        $req->shouldReceive('all')
+        $req->shouldReceive('except')
             ->andReturn($pd);
 
         // test: update
@@ -113,11 +117,21 @@ class ProfileControllerTest extends TestCase
             ];
 
             $req = $this->getRequest('profile');
-            $req->shouldReceive('all')
+
+            $req->shouldReceive('route')
+                ->with('uid')
+                ->andReturn(null);
+
+            $req->shouldReceive('input')
+                ->with('uid')
+                ->andReturn(null);
+
+            $req->shouldReceive('except')
                 ->andReturn($pd);
 
             // create
-            $c->create($req);
+            $rst = $c->create($req);
+            // $this->assertSame(2, json_encode($rst));
         }
 
         // test: list all
@@ -243,8 +257,9 @@ class ProfileControllerTest extends TestCase
         $c   = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
         $req = $this->getRequest('profile');
 
-        $req->shouldReceive('all')
-            ->andReturn(['file' => 'blah blah blah']);
+        $req->shouldReceive('except')
+            ->andReturn(['file' => $file]);
+
         $req->shouldReceive('file')
             ->with('file')
             ->andReturn($file);
