@@ -193,6 +193,11 @@ trait TableModelTrait
         return ['code' => 200];
     }
 
+    protected function shouldSkip()
+    {
+        return false;
+    }
+
     public function saveImportItem(&$inputs, $table, $idField = 'uid')
     {
         $model = get_class($this);
@@ -215,9 +220,9 @@ trait TableModelTrait
                 $item->setTableName(null, $table);
             }
 
-            if (!isset($item[$idField])) {
+            if ($item->shouldSkip()) {
                 $stat = 'skip';
-                return [$stat, null];
+                return [$stat, $item];
             }
         }
 
@@ -280,6 +285,7 @@ trait TableModelTrait
             \DB::rollback();
             $message = $e->getMessage();
             \Log::error('API import error: ' . $message);
+            \Log::error($e->getTrace());
             return [
                 'code'  => 422,
                 'error' => $message,
