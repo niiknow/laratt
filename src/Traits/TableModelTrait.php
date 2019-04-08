@@ -195,7 +195,7 @@ trait TableModelTrait
         $stat  = 'insert';
         $id    = isset($inputs[$idField]) ? $inputs[$idField] : null;
         $item  = new $model($inputs);
-        $item->tableCreate($table);
+        $item->setTableName(null, $table);
 
         if (isset($id)) {
             $inputs[$idField] = $id;
@@ -208,6 +208,7 @@ trait TableModelTrait
                 $stat = 'update';
             } else {
                 $item = new $model($inputs);
+                $item->setTableName(null, $table);
             }
 
             if (!isset($item[$idField])) {
@@ -237,7 +238,7 @@ trait TableModelTrait
             // start at 1 because header row is at 0
             $rowno = 1;
             foreach ($data as $inputs) {
-                list($stat, $item) = $this->saveImportItem($inputs, $idField, $table);
+                list($stat, $item) = $this->saveImportItem($inputs, $table, $idField);
 
                 if (null === $item && $stat !== 'skip') {
                     // rollback transaction
