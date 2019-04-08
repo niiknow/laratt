@@ -25,7 +25,7 @@ class TableModel extends Model
         'week_schedules', 'analytic_code', 'imp_pixel', 'msrp', 'price',
         'sale_price', 'sale_qty', 'skus', 'gtins', 'brands', 'cat1',
         'cat2', 'cat3', 'cat4', 'map_coords', 'clk_url', 'content',
-        'data', 'meta', 'var', 'import_id'
+        'data', 'meta', 'var'
     ];
 
     /**
@@ -120,7 +120,6 @@ class TableModel extends Model
                 $table->mediumText('data')->nullable();
                 // variant color, size, price, etc...
                 $table->mediumText('var')->nullable();
-                $table->uuid('import_id')->nullable()->index();
             });
 
             // cache database check for 45 minutes

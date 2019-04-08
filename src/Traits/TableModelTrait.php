@@ -131,11 +131,10 @@ trait TableModelTrait
      *
      * @param  array  $csv      the csv rows data
      * @param  array  &$data    the result array
-     * @param  string $importid the importid id
      * @param  array  $vrules   the validation rules
      * @return object        null or response object if error
      */
-    public function processCsv($csv, &$data, $importid, $vrules)
+    public function processCsv($csv, &$data, $vrules)
     {
         $rowno = 0;
         $limit = config('laratt.import_limit', 999);
@@ -162,28 +161,33 @@ trait TableModelTrait
                 array_set($inputs, $key, $cell);
             }
 
-            // validate data
-            $validator = Validator::make($inputs, $vrules);
+            // validate if rules are available
+            if (is_array($vrules) && count($vrules) > 0) {
+                // validate data
+                $validator = Validator::make($inputs, $vrules);
 
-            // capture and provide better error message
-            if ($validator->fails()) {
-                return [
-                    'code'  => 422,
-                    'error' => $validator->errors(),
-                    'rowno' => $rowno,
-                    'row'   => $inputs
-                ];
+                // capture and provide better error message
+                if ($validator->fails()) {
+                    return [
+                        'code'  => 422,
+                        'error' => $validator->errors(),
+                        'rowno' => $rowno,
+                        'row'   => $inputs
+                    ];
+                }
             }
 
             $data[] = $inputs;
+            $rowno += 1;
+
             if ($rowno > $limit) {
                 // we must improve a limit due to memory/resource restriction
                 return [
                     'code'  => 422,
-                    'error' => "Each import must be less than $limit records"
+                    'error' => "Import must be less than $limit records",
+                    'count' => $rowno
                 ];
             }
-            $rowno += 1;
         }
 
         return ['code' => 200];
@@ -231,6 +235,8 @@ trait TableModelTrait
         $inserted = [];
         $updated  = [];
         $skipped  = [];
+        $rowno    = 1;
+        $row      = [];
 
         // wrap import in a transaction
         \DB::beginTransaction();
@@ -238,6 +244,7 @@ trait TableModelTrait
             // start at 1 because header row is at 0
             $rowno = 1;
             foreach ($data as $inputs) {
+                $row               = $inputs;
                 list($stat, $item) = $this->saveImportItem($inputs, $table, $idField);
 
                 if (null === $item && $stat !== 'skip') {
@@ -248,8 +255,7 @@ trait TableModelTrait
                         'code'      => 422,
                         'error'     => 'Error while attempting to import row',
                         'rowno'     => $rowno,
-                        'row'       => $inputs,
-                        'import_id' => $importid
+                        'row'       => $row
                     ];
                 }
 
@@ -276,15 +282,18 @@ trait TableModelTrait
             \Log::error('API import error: ' . $message);
             return [
                 'code'  => 422,
-                'error' => $message
+                'error' => $message,
+                'rowno' => $rowno,
+                'row'   => $row
             ];
         }
 
         return [
-            'code' => 200,
+            'code'     => 200,
+            'count'    => $rowno,
             'inserted' => $inserted,
-            'updated' => $updated,
-            'skipped' => $skipped
+            'updated'  => $updated,
+            'skipped'  => $skipped
         ];
     }
 }

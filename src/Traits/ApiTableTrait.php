@@ -335,14 +335,17 @@ trait ApiTableTrait
      */
     public function update(Request $request)
     {
-        $tf        = $this->getTenantField();
-        $id        = $this->getId($request);
-        $rules     = $this->vrules;
-        $data      = $this->requestAll($request);
-        $validator = Validator::make($data, $rules);
+        $tf    = $this->getTenantField();
+        $id    = $this->getId($request);
+        $rules = $this->vrules;
+        $data  = $this->requestAll($request);
 
-        if ($validator->fails()) {
-            return $this->rsp(422, $validator->errors());
+        if (is_array($rules) && count($rules) > 0) {
+            $validator = Validator::make($data, $rules);
+
+            if ($validator->fails()) {
+                return $this->rsp(422, $validator->errors());
+            }
         }
 
         $inputs = array();
@@ -400,14 +403,12 @@ trait ApiTableTrait
         $csv  = \League\Csv\Reader::createFromFileObject($file)
             ->setHeaderOffset(0);
 
-        $data     = [];
-        $importid = (string) Str::uuid();
-        $model    = $this->getModel();
+        $data  = [];
+        $model = $this->getModel();
 
         $rsp = $model->processCsv(
             $csv,
             $data,
-            $importid,
             $this->vrules
         );
 
@@ -427,17 +428,8 @@ trait ApiTableTrait
         // $used_memory = (memory_get_usage() - $start_memory) / 1024 / 1024;
         // \Log::info("import - after save: $used_memory");
 
-        if ($rsp['code'] === 422) {
-            return $this->rsp(422, $rsp);
-        }
-
         // import success response
-        return $this->rsp(200, [
-            'inserted'  => $rsp['inserted'],
-            'updated'   => $rsp['updated'],
-            'skipped'   => $rsp['skipped'],
-            'import_id' => $importid
-        ]);
+        return $this->rsp($rsp['code'], $rsp);
     }
 
     /**
