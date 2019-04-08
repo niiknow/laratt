@@ -19,7 +19,7 @@ class LarattServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/laratt.php', 'laratt');
     }
 
-    public static function routeModel($modelName = 'Profile', $prefix = 'laratt')
+    public static function routeModel($modelName = 'Profile', $prefix = 'laratt', $idField = 'uid')
     {
         $model = mb_strtolower($modelName);
 
@@ -43,19 +43,19 @@ class LarattServiceProvider extends ServiceProvider
 
         Route::match(
             ['get', 'post'],
-            $model .'/{uid}/retrieve',
+            $model .'/{' . $idField . '}/retrieve',
             $modelName . 'Controller@retrieve'
         )->name('laratt.' . $model . '.retrieve');
 
         Route::match(
             ['post'],
-            $model . '/{uid}/update',
+            $model . '/{' . $idField . '}/update',
             $modelName . 'Controller@update'
         )->name("$prefix.$model" . '.update');
 
         Route::match(
             ['post', 'delete'],
-            $model . '/{uid}/delete',
+            $model . '/{' . $idField . '}/delete',
             $modelName . 'Controller@delete'
         )->name("$prefix.$model" . '.delete');
 
@@ -78,7 +78,7 @@ class LarattServiceProvider extends ServiceProvider
         )->name("$prefix.$model" . '.drop');
     }
 
-    public static function routeTables($controller, $prefix = 'laratt')
+    public static function routeTables($controller, $prefix = 'laratt', $idField = 'uid')
     {
         // table stuff
         Route::match(
@@ -101,19 +101,19 @@ class LarattServiceProvider extends ServiceProvider
 
         Route::match(
             ['get', 'post'],
-            'tables/{table}/{uid}/retrieve',
+            'tables/{table}/{' . $idField . '}/retrieve',
             $controller . '@retrieve'
         )->name($prefix . '.tables.retrieve');
 
         Route::match(
             ['post'],
-            'tables/{table}/{uid}/update',
+            'tables/{table}/{' . $idField . '}/update',
             $controller . '@update'
         )->name($prefix . '.tables.update');
 
         Route::match(
             ['post', 'delete'],
-            'tables/{table}/{uid}/delete',
+            'tables/{table}/{' . $idField . '}/delete',
             $controller . '@delete'
         )->name($prefix . '.tables.delete');
 

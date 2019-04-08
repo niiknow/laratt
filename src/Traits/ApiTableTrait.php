@@ -132,7 +132,7 @@ trait ApiTableTrait
         $tf     = $this->getTenantField();
 
         if ($tf !== null) {
-            $tn = $this->getTenantId();
+            $tn = $this->getTableName();
 
             if (!isset($inputs[$tf])) {
                 $inputs[$tf] = $tn;
@@ -350,8 +350,13 @@ trait ApiTableTrait
             array_set($inputs, $key, $value);
         }
 
+        if (null !== $tf) {
+            $inputs[$tf] = $this->getTableName();
+        }
+
         // \Log::info($inputs);
         $item = $this->getModel($inputs);
+
         if (isset($id)) {
             $input[$this->getIdField()] = $id;
             $item                       = $this->findById($id, true);
