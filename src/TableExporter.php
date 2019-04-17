@@ -63,7 +63,7 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
             $data[$k] = $da;
         }
 
-        $attrs = array_dot($data);
+        $attrs = \Illuminate\Support\Arr::dot($data);
         foreach ($this->headings as $key) {
             if (isset($attrs[$key])) {
                 $rst[] = $attrs[$key];

@@ -22,7 +22,7 @@ abstract class TestCase extends OrchestraTestCase
         parent::checkRequirements();
 
         collect($this->getAnnotations())->filter(function ($location) {
-            return in_array('!Travis', array_get($location, 'requires', []));
+            return in_array('!Travis', \Illuminate\Support\Arr::get($location, 'requires', []));
         })->each(function ($location) {
             getenv('TRAVIS') && $this->markTestSkipped('Travis will not run this test.');
         });

@@ -350,7 +350,7 @@ trait ApiTableTrait
 
         $inputs = array();
         foreach ($data as $key => $value) {
-            array_set($inputs, $key, $value);
+            \Illuminate\Support\Arr::set($inputs, $key, $value);
         }
 
         if (null !== $tf) {

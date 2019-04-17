@@ -158,7 +158,7 @@ trait TableModelTrait
                 }
 
                 // undot array
-                array_set($inputs, $key, $cell);
+                \Illuminate\Support\Arr::set($inputs, $key, $cell);
             }
 
             // validate if rules are available
