@@ -1,20 +1,8 @@
 <?php
-
 namespace Niiknow\Laratt;
 
 class TenancyResolver
 {
-    /**
-     * create a tenant slug
-     *
-     * @param  string $tenant tenant id
-     * @return string         the slug
-     */
-    public static function slug($tenant)
-    {
-        return preg_replace('/[^a-z0-9_]+/i', '', mb_strtolower($tenant));
-    }
-
     /**
      * Method for resolving tenant
      * @return
@@ -25,7 +13,7 @@ class TenancyResolver
         $resolver = config('laratt.resolver', '');
 
         if (!empty($resolver)
-            && (strpos($resolver, "niiknow") === false)
+            && (strpos($resolver, 'niiknow') === false)
             && is_callable($resolver)) {
             $tenant = call_user_func($resolver);
         } else {
@@ -33,10 +21,22 @@ class TenancyResolver
         }
 
         if (!isset($tenant)) {
-            $tenant = "";
+            $tenant = '';
         }
+
         // @codeCoverageIgnoreEnd
 
         return self::slug($tenant);
+    }
+
+    /**
+     * create a tenant slug
+     *
+     * @param  string $tenant tenant id
+     * @return string the slug
+     */
+    public static function slug($tenant)
+    {
+        return preg_replace('/[^a-z0-9_]+/i', '', mb_strtolower($tenant));
     }
 }

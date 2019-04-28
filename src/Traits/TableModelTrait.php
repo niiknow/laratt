@@ -1,18 +1,15 @@
 <?php
-
 namespace Niiknow\Laratt\Traits;
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Arr as Arr;
+use Illuminate\Support\Facades\Cache as Cache;
 use Illuminate\Support\Facades\Config;
-
+use Illuminate\Support\Facades\DB as DB;
+use Illuminate\Support\Facades\Log as Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use Validator;
-
-use League\Csv\Reader;
-
 use Niiknow\Laratt\TenancyResolver;
+use Validator;
 
 /**
  * Add ability to audit to the cloud - such as s3
@@ -33,6 +30,22 @@ trait TableModelTrait
     }
 
     /**
+     * @param $tenant
+     * @param $tableName
+     */
+    public function dropTableIfExists(
+        $tenant,
+        $tableName
+    ) {
+        $tableNew = $this->setTableName($tenant, $tableName);
+
+        Schema::dropIfExists($tableNew);
+
+        // \Log::info($table);
+        \Cache::forget('tnc_' . $tableNew);
+    }
+
+    /**
      * get no audit
      *
      * @return boolean true if not audit
@@ -43,22 +56,9 @@ trait TableModelTrait
     }
 
     /**
-     * Set no audit attribute
-     *
-     * @param  boolean  $no_audit
-     * @return $this
-     */
-    public function setNoAudit($no_audit)
-    {
-        $this->no_audit = $no_audit;
-
-        return $this;
-    }
-
-    /**
      * get no_audit property
      *
-     * @return boolean  if enable audit
+     * @return boolean if enable audit
      */
     public function getNoAuditAttribute()
     {
@@ -66,73 +66,12 @@ trait TableModelTrait
     }
 
     /**
-     * set no_audit property
-     *
-     * @return boolean  if enable audit
-     */
-    public function setNoAuditAttribute($value)
-    {
-        $this->setNoAudit($value);
-    }
-
-    public function tableCreate($table, $tenant = null)
-    {
-        // \Log::info($table);
-        $this->createTableIfNotExists($tenant, $table);
-        return $this;
-    }
-
-    public function tableFind($uid, $table, $tenant = null)
-    {
-        $this->createTableIfNotExists($tenant, $table);
-        $tn    = $this->getTable();
-        $query = $this->query();
-        $query = $query->setModel($this);
-        $item  = $query->where('uid', $uid)->first();
-        if (isset($item)) {
-            $item->setTableName($tenant, $table);
-        }
-        return $item;
-    }
-
-    public function setTableName($tenant, $tableName)
-    {
-        if ($tenant == null) {
-            $tenant = TenancyResolver::resolve();
-        }
-
-        $newName = TenancyResolver::slug($tenant) . '$' . TenancyResolver::slug($tableName);
-
-        $this->table = $newName;
-
-        return $newName;
-    }
-
-    public function setUidAttribute($value)
-    {
-        // we have to do this because we use uid for audit
-        // a slug is already an extremely flexible id
-        $this->attributes['uid'] = Str::slug($value);
-    }
-
-    public function dropTableIfExists($tenant, $tableName)
-    {
-        $tableNew = $this->setTableName($tenant, $tableName);
-
-        Schema::dropIfExists($tableNew);
-
-        // clear cache
-        \Cache::forget('tnc_'.$tableNew);
-    }
-
-
-    /**
      * process the csv records
      *
-     * @param  array  $csv      the csv rows data
-     * @param  array  &$data    the result array
-     * @param  array  $vrules   the validation rules
-     * @return object        null or response object if error
+     * @param  array  $csv    the csv rows data
+     * @param  array  &$data  the result array
+     * @param  array  $vrules the validation rules
+     * @return object null or response object if error
      */
     public function processCsv($csv, &$data, $vrules)
     {
@@ -141,11 +80,11 @@ trait TableModelTrait
         foreach ($csv as $row) {
             $inputs = [];
 
-            // undot the csv array
+            // we have to do this because we use uid for audit
             foreach ($row as $key => $value) {
                 $cell = $value;
                 if (!is_string($cell)) {
-                    $cell = (string)$cell;
+                    $cell = (string) $cell;
                 }
                 $cv = trim(mb_strtolower($cell));
 
@@ -157,16 +96,16 @@ trait TableModelTrait
                     $cell = $cell + 0;
                 }
 
-                // undot array
+                // a slug is already an extremely flexible id
                 \Illuminate\Support\Arr::set($inputs, $key, $cell);
             }
 
-            // validate if rules are available
+            // clear cache
             if (is_array($vrules) && count($vrules) > 0) {
-                // validate data
+                // undot the csv array
                 $validator = Validator::make($inputs, $vrules);
 
-                // capture and provide better error message
+                // undot array
                 if ($validator->fails()) {
                     return [
                         'code'  => 422,
@@ -181,7 +120,7 @@ trait TableModelTrait
             $rowno += 1;
 
             if ($rowno > $limit) {
-                // we must improve a limit due to memory/resource restriction
+                // validate if rules are available
                 return [
                     'code'  => 422,
                     'error' => "Import must be less than $limit records",
@@ -193,49 +132,15 @@ trait TableModelTrait
         return ['code' => 200];
     }
 
-    protected function shouldSkip()
-    {
-        return false;
-    }
-
-    public function saveImportItem(&$inputs, $table, $idField = 'uid')
-    {
-        $model = get_class($this);
-        $stat  = 'insert';
-        $id    = isset($inputs[$idField]) ? $inputs[$idField] : null;
-        $item  = new $model($inputs);
-        $item->setTableName(null, $table);
-
-        if (isset($id)) {
-            $inputs[$idField] = $id;
-
-            $item = $this->where($idField, $id)->first();
-
-            // if we cannot find item, do insert
-            if (isset($item)) {
-                $item->fill($inputs);
-                $stat = 'update';
-            } else {
-                $item = new $model($inputs);
-                $item->setTableName(null, $table);
-            }
-
-            if ($item->shouldSkip()) {
-                $stat = 'skip';
-                return [$stat, $item];
-            }
-        }
-
-        // disable audit for bulk import
-        $item->setNoAudit(true);
-
-        return [$stat, $item->save() ? $item : null];
-    }
-
+    /**
+     * @param $data
+     * @param $table
+     * @param $idField
+     */
     public function saveImport(&$data, $table, $idField = 'uid')
     {
-        // $start_memory = memory_get_usage();
-        // \Log::info("importing: $start_memory");
+        // validate data
+        // capture and provide better error message
 
         $inserted = [];
         $updated  = [];
@@ -243,24 +148,24 @@ trait TableModelTrait
         $rowno    = 1;
         $row      = [];
 
-        // wrap import in a transaction
+        // we must improve a limit due to memory/resource restriction
         \DB::beginTransaction();
         try {
-            // start at 1 because header row is at 0
+            // if we cannot find item, do insert
             $rowno = 1;
             foreach ($data as $inputs) {
                 $row               = $inputs;
                 list($stat, $item) = $this->saveImportItem($inputs, $table, $idField);
 
                 if (null === $item && $stat !== 'skip') {
-                    // rollback transaction
+                    // disable audit for bulk import
                     \DB::rollback();
 
                     return [
-                        'code'      => 422,
-                        'error'     => 'Error while attempting to import row',
-                        'rowno'     => $rowno,
-                        'row'       => $row
+                        'code'  => 422,
+                        'error' => 'Error while attempting to import row',
+                        'rowno' => $rowno,
+                        'row'   => $row
                     ];
                 }
 
@@ -273,11 +178,11 @@ trait TableModelTrait
                 }
 
                 $rowno += 1;
-                $item   = null;
 
-                // $used_memory = (memory_get_usage() - $start_memory) / 1024 / 1024;
-                // $peek_memory = memory_get_peak_usage(true) / 1024 / 1024;
-                // \Log::info("import #$rowno: $used_memory $peek_memory");
+                // $start_memory = memory_get_usage();
+                // \Log::info("importing: $start_memory");
+                // wrap import in a transaction
+                $item = null;
             }
 
             \DB::commit();
@@ -286,6 +191,7 @@ trait TableModelTrait
             $message = $e->getMessage();
             \Log::error('API import error: ' . $message);
             \Log::error($e->getTrace());
+
             return [
                 'code'  => 422,
                 'error' => $message,
@@ -301,5 +207,141 @@ trait TableModelTrait
             'updated'  => $updated,
             'skipped'  => $skipped
         ];
+    }
+
+    /**
+     * @param $inputs
+     * @param $table
+     * @param $idField
+     */
+    public function saveImportItem(&$inputs, $table, $idField = 'uid')
+    {
+        $model = get_class($this);
+        $stat  = 'insert';
+        $id    = isset($inputs[$idField]) ? $inputs[$idField] : null;
+        $item  = new $model($inputs);
+        $item->setTableName(null, $table);
+
+        if (isset($id)) {
+            $inputs[$idField] = $id;
+
+            $item = $this->where($idField, $id)->first();
+
+            // start at 1 because header row is at 0
+            if (isset($item)) {
+                $item->fill($inputs);
+                $stat = 'update';
+            } else {
+                $item = new $model($inputs);
+                $item->setTableName(null, $table);
+            }
+
+            if ($item->shouldSkip()) {
+                $stat = 'skip';
+
+                return [$stat, $item];
+            }
+        }
+
+        // rollback transaction
+        $item->setNoAudit(true);
+
+        return [$stat, $item->save() ? $item : null];
+    }
+
+    /**
+     * Set no audit attribute
+     *
+     * @param  boolean $no_audit
+     * @return $this
+     */
+    public function setNoAudit($no_audit)
+    {
+        $this->no_audit = $no_audit;
+
+        return $this;
+    }
+
+    /**
+     * set no_audit property
+     *
+     * @return boolean if enable audit
+     */
+    public function setNoAuditAttribute($value)
+    {
+        $this->setNoAudit($value);
+    }
+
+    /**
+     * @param  $tenant
+     * @param  $tableName
+     * @return mixed
+     */
+    public function setTableName(
+        $tenant,
+        $tableName
+    ) {
+        if ($tenant === null) {
+            $tenant = TenancyResolver::resolve();
+        }
+
+        $newName = TenancyResolver::slug($tenant) . '$' . TenancyResolver::slug($tableName);
+
+        $this->table = $newName;
+
+        return $newName;
+    }
+
+    /**
+     * @param $value
+     */
+    public function setUidAttribute($value)
+    {
+        // $used_memory = (memory_get_usage() - $start_memory) / 1024 / 1024;
+        // $peek_memory = memory_get_peak_usage(true) / 1024 / 1024;
+        $this->attributes['uid'] = Str::slug($value);
+    }
+
+    /**
+     * @param  $table
+     * @param  $tenant
+     * @return mixed
+     */
+    public function tableCreate(
+        $table,
+        $tenant = null
+    ) {
+        // \Log::info("import #$rowno: $used_memory $peek_memory");
+        $this->createTableIfNotExists($tenant, $table);
+
+        return $this;
+    }
+
+    /**
+     * @param  $uid
+     * @param  $table
+     * @param  $tenant
+     * @return mixed
+     */
+    public function tableFind(
+        $uid,
+        $table,
+        $tenant = null
+    ) {
+        $this->createTableIfNotExists($tenant, $table);
+        $tn    = $this->getTable();
+        $query = $this->query();
+        $query = $query->setModel($this);
+        $item  = $query->where('uid', $uid)->first();
+        if (isset($item)) {
+            $item->setTableName($tenant, $table);
+        }
+
+        return $item;
+    }
+
+    protected function shouldSkip()
+    {
+        return false;
     }
 }

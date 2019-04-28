@@ -1,5 +1,5 @@
 <?php
-
+// phpcs:ignoreFile
 namespace Niiknow\Laratt;
 
 use Illuminate\Support\Facades\Route;
@@ -9,25 +9,31 @@ class LarattServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $this->publishes([
-            __DIR__.'/../config/laratt.php' => config_path('laratt.php'),
-        ], 'config');
+        $this->publishes([__DIR__ . '/../config/laratt.php' => config_path('laratt.php')], 'config');
     }
 
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/laratt.php', 'laratt');
+        $this->mergeConfigFrom(__DIR__ . '/../config/laratt.php', 'laratt');
     }
 
-    public static function routeModel($modelName = 'Profile', $prefix = 'laratt', $idField = 'uid')
-    {
+    /**
+     * @param $modelName
+     * @param $prefix
+     * @param $idField
+     */
+    public static function routeModel(
+        $modelName = 'Profile',
+        $prefix = 'laratt',
+        $idField = 'uid'
+    ) {
         $model = mb_strtolower($modelName);
 
         Route::match(
-            ['get','delete'],
-            $model . '/list',
-            $modelName . 'Controller@list'
-        )->name("$prefix.$model" . '.list');
+            ['get', 'delete'],
+            $model . '/query',
+            $modelName . 'Controller@query'
+        )->name("$prefix.$model" . '.query');
 
         Route::match(
             ['get', 'post'],
@@ -43,7 +49,7 @@ class LarattServiceProvider extends ServiceProvider
 
         Route::match(
             ['get', 'post'],
-            $model .'/{' . $idField . '}/retrieve',
+            $model . '/{' . $idField . '}/retrieve',
             $modelName . 'Controller@retrieve'
         )->name('laratt.' . $model . '.retrieve');
 
@@ -78,14 +84,22 @@ class LarattServiceProvider extends ServiceProvider
         )->name("$prefix.$model" . '.drop');
     }
 
-    public static function routeTables($controller, $prefix = 'laratt', $idField = 'uid')
-    {
+    /**
+     * @param $controller
+     * @param $prefix
+     * @param $idField
+     */
+    public static function routeTables(
+        $controller,
+        $prefix = 'laratt',
+        $idField = 'uid'
+    ) {
         // table stuff
         Route::match(
-            ['get','delete'],
-            'tables/list',
-            $controller . '@list'
-        )->name($prefix . '.tables.list');
+            ['get', 'delete'],
+            'tables/query',
+            $controller . '@query'
+        )->name($prefix . '.tables.query');
 
         Route::match(
             ['get', 'post'],

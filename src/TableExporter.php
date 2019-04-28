@@ -1,21 +1,34 @@
 <?php
-
 namespace Niiknow\Laratt;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr as Arr;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
 class TableExporter implements FromCollection, WithHeadings, WithMapping
 {
-    protected $headings;
-
-    protected $query;
-
+    /**
+     * @var mixed
+     */
     protected $acols;
 
+    /**
+     * @var mixed
+     */
+    protected $headings;
+
+    /**
+     * @var mixed
+     */
+    protected $query;
+
+    /**
+     * @param $query
+     * @param $model
+     */
     public function __construct($query, $model)
     {
         // only fillable are exportable
@@ -23,27 +36,42 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
         $acols = [];
 
         if (method_exists($model, 'getExportable')) {
-            list ($cols, $acols) = $model->getExportable();
+            list($cols, $acols) = $model->getExportable();
         }
 
-        $this->query    = new \Illuminate\Database\Eloquent\Builder($query);
+        $this->query = new \Illuminate\Database\Eloquent\Builder($query);
         $this->query->setModel($model);
         $this->headings = $cols;
         $this->acols    = $acols;
     }
 
+    /**
+     * @return mixed
+     */
+    public function collection()
+    {
+        return $this->query->get();
+    }
+
+    /**
+     * @return mixed
+     */
     public function headings(): array
     {
         return $this->headings;
     }
 
+    /**
+     * @param  $item
+     * @return mixed
+     */
     public function map($item): array
     {
-        $rst   = [];
-        $data  = $item->toArray();
+        $rst  = [];
+        $data = $item->toArray();
 
         // use acols to determine if data will be array or string
-        foreach($this->acols as $k => $class) {
+        foreach ($this->acols as $k => $class) {
             $da = $item->{$k};
 
             // string array are pipe delimited
@@ -73,10 +101,5 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
         }
 
         return $rst;
-    }
-
-    public function collection()
-    {
-        return $this->query->get();
     }
 }

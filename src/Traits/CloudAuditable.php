@@ -1,12 +1,10 @@
 <?php
-
 namespace Niiknow\Laratt\Traits;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Config;
-
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage as Storage;
 
 /**
  * Add ability to audit to the cloud - such as s3
@@ -31,7 +29,7 @@ trait CloudAuditable
                 ];
 
                 // do not log sensitive data
-                if (array_search($key, $auditable->hidden)) {
+                if (array_search($key, $auditable->hidden, true)) {
                     $record['old'] = '***HIDDEN***';
                     $record['new'] = '***HIDDEN***';
                 }
@@ -50,7 +48,7 @@ trait CloudAuditable
     /**
      * Determine if cloud audit is enabled.
      *
-     * @return boolean   false if not enabled
+     * @return boolean false if not enabled
      */
     public function canCloudAudit()
     {
@@ -70,7 +68,7 @@ trait CloudAuditable
         }
 
         $tn    = $this->getTable();
-        $parts = explode("$", $tn);
+        $parts = explode('$', $tn);
         if (!preg_match("/$iten/", $parts[0])
             || !preg_match("/$itab/", $parts[1])) {
             return false;
@@ -91,72 +89,11 @@ trait CloudAuditable
     }
 
     /**
-     * Obtain cloud audit metadata.
-     *
-     * @param  string $action audit action
-     * @param  array  $log    extra log info
-     * @return object         the audit meta data
-     */
-    public function cloudAuditBody($action, $log = [])
-    {
-        // $user    = null;
-        $tn      = $this->getTable();
-        $parts   = explode("$", $tn);
-        $request = request();
-        $route   = $request->route();
-        $now     = Carbon::now('UTC');
-        $memuse  = round(memory_get_peak_usage(true) / 1024 / 1024, 1);
-        $body    = [
-            // unique id allow for event idempotency/nonce key
-            'app_name'     => config('app.name'),
-            'class_name'   => get_class($this),
-            'table_name'   => $tn,
-            'tenant'       => $parts[0],
-            'table'        => $parts[1],
-            'action'       => $action,
-            'log'          => $log,
-            'created_at'   => $now->timestamp,
-            'mem_use'      => $memuse,
-            'uname'        => php_uname(),
-        ];
-
-        if ($route !== null) {
-            // $user         = $request->user();
-            $route_params = $route->parameters();
-
-            $body = array_merge($body, [
-                // 'user'          => $user,
-                'id_address'    => $request->ip(),
-                'user_agent'    => $request->userAgent(),
-                'referer'       => $request->header('referer'),
-                'locale'        => $request->header('accept-language'),
-                'forwarded_for' => $request->header('x-forwarded-for'),
-                'content_type'  => $request->header('content-type'),
-                'content_length'=> $request->header('content-length'),
-                'device_type'   => $request->device_type,
-                'os'            => $request->os,
-                'browser'       => $request->browser,
-                'client'        => $request->client_information,
-                'host'          => $request->getHttpHost(),
-                'method'        => $request->method(),
-                'path'          => $request->path(),
-                'url'           => $request->url(),
-                'full_url'      => $request->fullUrl(),
-                'route_action'  => $request->route()->getActionName(),
-                'route_query'   => $request->query(),
-                'route_params'  => $route_params
-            ]);
-        }
-
-        return $body;
-    }
-
-    /**
      * use to audit the current object
      *
      * @param  string $action audit action
      * @param  array  $log    extra log info
-     * @return object         the current object
+     * @return object the current object
      */
     public function cloudAudit($action, $log = [])
     {
@@ -169,28 +106,81 @@ trait CloudAuditable
         if ($this->canCloudAudit()) {
             $table    = $this->getTable();
             $filename = "$table/$uid/index";
+
             return $this->cloudAuditWrite($action, $log, null, $filename);
         }
     }
 
     /**
-     * override this function to provide extra audit data
-     * @return Array  Audit info
+     * Obtain cloud audit metadata.
+     *
+     * @param  string $action audit action
+     * @param  array  $log    extra log info
+     * @return object the audit meta data
      */
-    public function getCloudAuditInfo()
+    public function cloudAuditBody($action, $log = [])
     {
-        return [];
+        // $user    = null;
+        $tn      = $this->getTable();
+        $parts   = explode('$', $tn);
+        $request = request();
+        $route   = $request->route();
+        $now     = Carbon::now('UTC');
+        $memuse  = round(memory_get_peak_usage(true) / 1024 / 1024, 1);
+        $body    = [
+            // unique id allow for event idempotency/nonce key
+            'app_name'   => config('app.name'),
+            'class_name' => get_class($this),
+            'table_name' => $tn,
+            'tenant'     => $parts[0],
+            'table'      => $parts[1],
+            'action'     => $action,
+            'log'        => $log,
+            'created_at' => $now->timestamp,
+            'mem_use'    => $memuse,
+            'uname'      => php_uname()
+        ];
+
+        if ($route !== null) {
+            // $user         = $request->user();
+            $route_params = $route->parameters();
+
+            $body = array_merge($body, [
+                // 'user'          => $user,
+                'id_address'     => $request->ip(),
+                'user_agent'     => $request->userAgent(),
+                'referer'        => $request->header('referer'),
+                'locale'         => $request->header('accept-language'),
+                'forwarded_for'  => $request->header('x-forwarded-for'),
+                'content_type'   => $request->header('content-type'),
+                'content_length' => $request->header('content-length'),
+                'device_type'    => $request->device_type,
+                'os'             => $request->os,
+                'browser'        => $request->browser,
+                'client'         => $request->client_information,
+                'host'           => $request->getHttpHost(),
+                'method'         => $request->method(),
+                'path'           => $request->path(),
+                'url'            => $request->url(),
+                'full_url'       => $request->fullUrl(),
+                'route_action'   => $request->route()->getActionName(),
+                'route_query'    => $request->query(),
+                'route_params'   => $route_params
+            ]);
+        }
+
+        return $body;
     }
 
     /**
      * write to cloud - allow to override or special audit
      * per example use in bulk import
      *
-     * @param  string $action audit action
-     * @param  array  $log    extra log info
+     * @param  string $action   audit action
+     * @param  array  $log      extra log info
      * @param  string $model    the object
      * @param  string $filename the file name without extension, null is $timestamp-log.json
-     * @return object           the current object
+     * @return object the current object
      */
     public function cloudAuditWrite($action, $log = [], $model = null, $filename = null)
     {
@@ -203,12 +193,12 @@ trait CloudAuditable
             $filename = "$table/" . (9999 - $now->year) .
                 (99 - $now->month) .
                 (99 - $now->day) .
-                "_revts";
-        } elseif (strpos($filename, $table . "/") === false) {
+                '_revts';
+        } elseif (strpos($filename, $table . '/') === false) {
             $path = "$table/$filename";
         }
 
-        $path = $filename . ".json";
+        $path = $filename . '.json';
         $body = $this->cloudAuditBody($action, $log);
 
         if ($model) {
@@ -241,12 +231,21 @@ trait CloudAuditable
                 gzencode(json_encode($body)),
                 'private',
                 ['params' => [
-                        'ContentType' => 'application/json',
-                        'ContentEncoding' => 'gzip',
-                    ]
+                    'ContentType'     => 'application/json',
+                    'ContentEncoding' => 'gzip'
+                ]
                 ]
             );
 
         return $this;
+    }
+
+    /**
+     * override this function to provide extra audit data
+     * @return Array Audit info
+     */
+    public function getCloudAuditInfo()
+    {
+        return [];
     }
 }

@@ -1,36 +1,40 @@
 <?php
-
 namespace Niiknow\Laratt\Tests\Unit;
 
-use Niiknow\Laratt\Tests\TestCase;
+use Illuminate\Support\Facades\Request as Request;
+use Mockery as Mockery;
+use Niiknow\Laratt\Models\TableModel as TableModel;
 use Niiknow\Laratt\Tests\Controllers\TableController;
-
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
+use Niiknow\Laratt\Tests\TestCase;
 
 class TableControllerTest extends TestCase
 {
-    public static function tenant()
-    {
-        return 'tctest';
-    }
-
+    /**
+     * @param  $table
+     * @return mixed
+     */
     public function getRequest($table)
     {
         $mock = \Mockery::mock(\Illuminate\Http\Request::class)->makePartial();
 
         $mock->shouldReceive('route')
-            ->with('table')
-            ->andReturn($table);
+             ->with('table')
+             ->andReturn($table);
 
         return $mock;
     }
 
-    /** @test */
-    public function test_crud_boom_table()
+    public static function tenant()
     {
-        echo "\n\r{$this->yellow}    should create, update, and delete table records...";
+        return 'tctest';
+    }
+
+    /**
+     * @test
+     */
+    public function testCrudBoomTable()
+    {
+        print "\n\r{$this->yellow}    should create, update, and delete table records...";
 
         $c = new \Niiknow\Laratt\Tests\Controllers\TableController();
 
@@ -68,7 +72,6 @@ class TableControllerTest extends TestCase
         // var_dump($rstr);
         $this->assertInstanceOf(\Niiknow\Laratt\Models\TableModel::class, $rstr);
 
-
         $req = $this->getRequest('boom');
 
         $req->shouldReceive('route')
@@ -100,6 +103,6 @@ class TableControllerTest extends TestCase
         // truncate table
         $c->truncate($req);
 
-        echo " {$this->green}[OK]{$this->white}\r\n";
+        print " {$this->green}[OK]{$this->white}\r\n";
     }
 }

@@ -51,7 +51,9 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit"
+        "test": "vendor/bin/phpunit",
+        "phpcs": "phpcs",
+        "phpcs:fix": "phpcbf -w"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

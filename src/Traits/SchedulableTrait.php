@@ -1,10 +1,5 @@
 <?php
-
 namespace Niiknow\Laratt\Traits;
-
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Config;
 
 use Carbon\Carbon;
 
@@ -25,11 +20,19 @@ trait SchedulableTrait
         });
     }
 
-    public function setStartedAtAttribute($value)
+    /**
+     * @param $value
+     */
+    public function getEndedAtAttribute($value)
     {
-        $this->attributes['started_at'] = Carbon::parse($value)->startOfDay();
+        if (isset($value) && !empty($value)) {
+            return Carbon::parse($value)->format('Y-m-d');
+        }
     }
 
+    /**
+     * @param $value
+     */
     public function getStartedAtAttribute($value)
     {
         if (isset($value) && !empty($value)) {
@@ -37,15 +40,19 @@ trait SchedulableTrait
         }
     }
 
+    /**
+     * @param $value
+     */
     public function setEndedAtAttribute($value)
     {
         $this->attributes['ended_at'] = Carbon::parse($value)->startOfDay();
     }
 
-    public function getEndedAtAttribute($value)
+    /**
+     * @param $value
+     */
+    public function setStartedAtAttribute($value)
     {
-        if (isset($value) && !empty($value)) {
-            return Carbon::parse($value)->format('Y-m-d');
-        }
+        $this->attributes['started_at'] = Carbon::parse($value)->startOfDay();
     }
 }

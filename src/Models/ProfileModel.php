@@ -1,20 +1,48 @@
 <?php
-
 namespace Niiknow\Laratt\Models;
 
-use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Cache as Cache;
+use Illuminate\Support\Facades\Schema;
 use Niiknow\Laratt\Traits\CloudAuditable;
 use Niiknow\Laratt\Traits\TableModelTrait;
-use Carbon\Carbon;
 
 class ProfileModel extends Authenticatable
 {
     use CloudAuditable,
         TableModelTrait;
+
+    /**
+     * generated attributes
+     *
+     * @var array
+     */
+    protected $appends = ['name'];
+
+    /**
+     * @var array
+     */
+    protected $casts = [
+        'meta'                     => 'array',
+        'data'                     => 'array',
+        'is_retired_or_unemployed' => 'boolean'
+    ];
+
+    /**
+     * The attributes that should be casted by Carbon
+     *
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'password_updated_at',
+        'email_verified_at',
+        'tfa_exp_at',
+        'seen_at'
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -35,42 +63,19 @@ class ProfileModel extends Authenticatable
     ];
 
     /**
-     * @var array
+     * @param  $tenant
+     * @param  $tableName
+     * @return mixed
      */
-    protected $casts = [
-        'meta' => 'array',
-        'data' => 'array',
-        'is_retired_or_unemployed' => 'boolean'
-    ];
-
-    /**
-     * The attributes that should be casted by Carbon
-     *
-     * @var array
-     */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'password_updated_at',
-        'email_verified_at',
-        'tfa_exp_at',
-        'seen_at'
-    ];
-
-    /**
-     * generated attributes
-     *
-     * @var array
-     */
-    protected $appends = ['name'];
-
-    public function createTableIfNotExists($tenant, $tableName = 'profile')
-    {
+    public function createTableIfNotExists(
+        $tenant,
+        $tableName = 'profile'
+    ) {
         $tableName = 'profile';
         $tableNew  = $this->setTableName($tenant, $tableName);
 
-        // only need to improve performance in prod
-        if (config('env') === 'production' && \Cache::has('tnc_'.$tableNew)) {
+// only need to improve performance in prod
+        if (config('env') === 'production' && \Cache::has('tnc_' . $tableNew)) {
             return $tableNew;
         }
 
@@ -78,13 +83,15 @@ class ProfileModel extends Authenticatable
             Schema::create($tableNew, function (Blueprint $table) {
                 $table->increments('id');
 
-                // client/consumer/external primary key
-                // this allow client to prevent duplicate
+// client/consumer/external primary key
+
+// this allow client to prevent duplicate
                 // for example, duplicate during bulk import
                 $table->string('uid', 50)->unique();
 
-                // the list of fields below has been carefully
-                // choosen to support profile including
+// the list of fields below has been carefully
+
+// choosen to support profile including
                 // ecommerce and federal donation system
                 $table->string('email')->unique();
                 $table->timestamp('email_verified_at')->nullable();
@@ -145,53 +152,111 @@ class ProfileModel extends Authenticatable
             });
 
             // cache database check for 45 minutes
-            \Cache::add('tnc_'.$tableNew, 'true', 45);
+            \Cache::add('tnc_' . $tableNew, 'true', 45);
         }
 
         return $tableNew;
     }
 
+    // reset authy id
+
+    /**
+     * @param $value
+     */
+    public function getImageUrlAttribute($value)
+    {
+        $defaultUrl = 'https://www.gravatar.com/avatar/' . md5(mb_strtolower($this->email)) . '.jpg?s=200&d=mm';
+
+        return !isset($value)
+        || strlen($value) <= 0
+        || strpos($value, 'http') === false ? $defaultUrl : url($value);
+    }
+
+    /**
+     * @param  $value
+     * @return mixed
+     */
+    public function getNameAttribute($value)
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    // <tfa
+    /**
+     * @return mixed
+     */
+    public function getTfaCode()
+    {
+        $value = $this->attributes['tfa_code'];
+
+        return $value;
+    }
+
+    /**
+     * @param $value
+     */
     public function setEmailAttribute($value)
     {
         $existing = $this->email;
         $new      = mb_strtolower($value);
 
-        // reset authy id
-        if ($existing != $new) {
+// set expire in 10 minutes
+        if ($existing !== $new) {
             $this->attributes['email'] = $new;
             $this->authy_id            = null;
         }
     }
 
-    public function setPhoneAttribute($value)
+    /**
+     * @param $value
+     */
+    public function setFirstNameAttribute($value)
     {
-        $existing = $this->phone;
-        $new      = preg_replace('/\D+/', '', $value);
-
-        if ($existing != $new) {
-            $this->attributes['phone'] = $new;
-            $this->authy_id            = null;
-        }
+        $this->attributes['first_name'] = ucfirst($value);
     }
 
-    public function setPhoneCountryCodeAttribute($value)
+    /**
+     * @param $value
+     */
+    public function setLastNameAttribute($value)
     {
-        $this->attributes['phone_country_code'] = preg_replace('/[^0-9\+]/', '', $value);
+        $this->attributes['last_name'] = ucfirst($value);
     }
 
+    /**
+     * @param $value
+     */
     public function setPasswordAttribute($value)
     {
         $this->attributes['password']            = $value;
         $this->attributes['password_updated_at'] = Carbon::now();
     }
 
-// <tfa
-    public function getTfaCode()
+    /**
+     * @param $value
+     */
+    public function setPhoneAttribute($value)
     {
-        $value = $this->attributes['tfa_code'];
-        return $value;
+        $existing = $this->phone;
+        $new      = preg_replace('/\D+/', '', $value);
+
+        if ($existing !== $new) {
+            $this->attributes['phone'] = $new;
+            $this->authy_id            = null;
+        }
     }
 
+    /**
+     * @param $value
+     */
+    public function setPhoneCountryCodeAttribute($value)
+    {
+        $this->attributes['phone_country_code'] = preg_replace('/[^0-9\+]/', '', $value);
+    }
+
+    /**
+     * @param $value
+     */
     public function setTfaCode($value = null)
     {
         if (!isset($value)) {
@@ -200,32 +265,7 @@ class ProfileModel extends Authenticatable
 
         $this->attributes['tfa_code'] = $value;
 
-        // set expire in 10 minutes
+        // </tfa
         $this->attributes['tfa_exp_at'] = Carbon::now()->addMinutes(10);
-    }
-// </tfa
-
-    public function getImageUrlAttribute($value)
-    {
-        $defaultUrl = 'https://www.gravatar.com/avatar/'.md5(mb_strtolower($this->email)).'.jpg?s=200&d=mm';
-
-        return !isset($value)
-            || strlen($value) <= 0
-            || strpos($value, "http") === false ? $defaultUrl : url($value);
-    }
-
-    public function setFirstNameAttribute($value)
-    {
-        $this->attributes['first_name'] = ucfirst($value);
-    }
-
-    public function setLastNameAttribute($value)
-    {
-        $this->attributes['last_name'] = ucfirst($value);
-    }
-
-    public function getNameAttribute($value)
-    {
-        return $this->first_name . ' ' . $this->last_name;
     }
 }

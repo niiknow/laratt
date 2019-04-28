@@ -20,7 +20,7 @@ php artisan vendor:publish --provider="Niiknow\Laratt\LarattServiceProvider"
 - [x] Dynamic table as `tenant$table_name`
 - [x] Tenant resolution use `X-Tenant` header by default; though, it is customizable by providing a static function for `resolver` config.
 - [x] A generic Controller Trait that provide simple and flexible CRUD (create, retrieve, update, delete) REST endpoint.
-- [x] Simple query and bulk delete `/list` REST endpoint.
+- [x] Simple query and bulk delete `/query` REST endpoint.
 - [x] jQuery DataTables as `/data` endpoint with [laravel-datatables](https://github.com/yajra/laravel-datatables) 
 - [x] Pre-defined structured schema for `ProfileModel`
 - [x] Schedulable and ecommerce schema type for `TableModel`
@@ -41,7 +41,7 @@ Also note that there are two ids: `id` and `uid`. `id` is internal to **laratt**
 
 Providing a `uid` allow the API `update` to effectively act as an `merge/upsert` operation.  This mean that, if you call update with a `uid`, it will `update` if the record is found, otherwise `insert` a new record.
 
-- `/list` endpoint is use for query and bulk `DELETE`, see: [Query Syntax](#query-syntax)
+- `/query` endpoint is use for query and bulk `DELETE`, see: [Query Syntax](#query-syntax)
 - `/data` endpoint is use for returning jQuery DataTables format using [laravel-datatables](https://github.com/yajra/laravel-datatables).
 - `/import` bulk import is csv to allow for bigger import.  Up to 10000 records instead of some small number like 100 for Azure Table Storage (also see admin config to adjust).  This allow for efficiency of smaller file and quicker file transfer/upload.
 - `/truncate` truncate all data from table.
@@ -50,15 +50,15 @@ Providing a `uid` allow the API `update` to effectively act as an `merge/upsert`
 What about your own/custom schema?  See example of our [Profile Schema](https://github.com/niiknow/laratt/blob/master/src/Models/ProfileModel.php#L78)
 
 ## Query-Syntax
-This library provide simple query endpoint for search and bulk delete: `api/v1/profile/list` or `api/v1/tables/{table}/list`
+This library provide simple query endpoint for search and bulk delete: `api/v1/profile/query` or `api/v1/tables/{table}/query`
 
 ### Limiting
 
 To limit the number of returned resources to a specific amount:
 
 ```
-/list?limit=10
-/list?limit=20
+/query?limit=10
+/query?limit=20
 ```
 
 ### Sorting
@@ -66,14 +66,14 @@ To limit the number of returned resources to a specific amount:
 To sort the resources by a column in ascending or descending order:
 
 ```
-/list?sort[]=column:asc
-/list?sort[]=column:desc
+/query?sort[]=column:asc
+/query?sort[]=column:desc
 ```
 
 You could also have multiple sort queries:
 
 ```
-/list?sort[]=column1:asc&sort[]=column2:desc
+/query?sort[]=column1:asc&sort[]=column2:desc
 ```
 
 ### Filtering
@@ -81,7 +81,7 @@ You could also have multiple sort queries:
 The basic format to filter the resources:
 
 ```
-/list?filter[]=column:operator:value
+/query?filter[]=column:operator:value
 ```
 
 **Note:** The `value`s are `rawurldecode()`d.
@@ -90,35 +90,35 @@ The basic format to filter the resources:
 
 | Operator | Description | Example |
 | --- | --- | --- |
-| eq | Equal to | `/list?filter[]=column1:eq:123` |
-| neq | Not equal to | `/list?filter[]=column1:neq:123` |
-| gt | Greater than | `/list?filter[]=column1:gt:123` |
-| gte | Greater than or equal to | `/list?filter[]=column1:gte:123` |
-| lt | Less than | `/list?filter[]=column1:lt:123` |
-| lte | Less than or equal to | `/list?filter[]=column1:lte:123` |
-| ct | Contains text | `/list?filter[]=column1:ct:some%20text` |
-| nct | Does not contains text | `/list?filter[]=column1:nct:some%20text` |
-| sw | Starts with text | `/list?filter[]=column1:sw:some%20text` |
-| nsw | Does not start with text | `/list?filter[]=column1:nsw:some%20text` |
-| ew | Ends with text | `/list?filter[]=column1:ew:some%20text` |
-| new | Does not end with text | `/list?filter[]=column1:new:some%20text` |
-| bt | Between two values | `/list?filter[]=column1:bt:123\|321` |
-| nbt | Not between two values | `/list?filter[]=column1:nbt:123\|321` |
-| in | In array | `/list?filter[]=column1:in:123\|321\|231` |
-| nin | Not in array | `/list?filter[]=column1:nin:123\|321\|231` |
-| nl | Is null | `/list?filter[]=column1:nl` |
-| nnl | Is not null | `/list?filter[]=column1:nnl` |
+| eq | Equal to | `/query?filter[]=column1:eq:123` |
+| neq | Not equal to | `/query?filter[]=column1:neq:123` |
+| gt | Greater than | `/query?filter[]=column1:gt:123` |
+| gte | Greater than or equal to | `/query?filter[]=column1:gte:123` |
+| lt | Less than | `/query?filter[]=column1:lt:123` |
+| lte | Less than or equal to | `/query?filter[]=column1:lte:123` |
+| ct | Contains text | `/query?filter[]=column1:ct:some%20text` |
+| nct | Does not contains text | `/query?filter[]=column1:nct:some%20text` |
+| sw | Starts with text | `/query?filter[]=column1:sw:some%20text` |
+| nsw | Does not start with text | `/query?filter[]=column1:nsw:some%20text` |
+| ew | Ends with text | `/query?filter[]=column1:ew:some%20text` |
+| new | Does not end with text | `/query?filter[]=column1:new:some%20text` |
+| bt | Between two values | `/query?filter[]=column1:bt:123\|321` |
+| nbt | Not between two values | `/query?filter[]=column1:nbt:123\|321` |
+| in | In array | `/query?filter[]=column1:in:123\|321\|231` |
+| nin | Not in array | `/query?filter[]=column1:nin:123\|321\|231` |
+| nl | Is null | `/query?filter[]=column1:nl` |
+| nnl | Is not null | `/query?filter[]=column1:nnl` |
 
 You can also do `OR` and `AND` clauses. For `OR` clauses, use commas inside the same `filter[]` query:
 
 ```
-/list?filter[]=column1:operator:value1,column2:operator:value2
+/query?filter[]=column1:operator:value1,column2:operator:value2
 ```
 
 For `AND` clauses, use another `filter[]` query.
 
 ```
-/list?filter[]=column1:operator:value1&filter[]=column2:operator:value2
+/query?filter[]=column1:operator:value1&filter[]=column2:operator:value2
 ```
 
 ## License
