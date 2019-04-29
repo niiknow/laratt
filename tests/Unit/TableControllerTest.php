@@ -42,7 +42,7 @@ class TableControllerTest extends TestCase
 
         $req = $this->getRequest('boom');
         $pd  = [
-            'name' => 'Tom'
+            'private.name' => 'Tom'
         ];
 
         $req->shouldReceive('uid')
@@ -78,7 +78,7 @@ class TableControllerTest extends TestCase
             ->with('uid')
             ->andReturn($rstc->uid);
 
-        $pd['name'] = 'Noogen';
+        $pd['private.name'] = 'Noogen';
         $req->shouldReceive('except')
             ->andReturn($pd);
 
@@ -87,9 +87,9 @@ class TableControllerTest extends TestCase
         // var_dump($rstr);
         $this->assertInstanceOf(\Niiknow\Laratt\Models\TableModel::class, $rstr);
 
-        $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest$boom')->where('name', $pd['name'])->first();
+        $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest$boom')->where('uid', $rstc->uid)->first();
         $this->assertTrue(isset($item));
-        $this->assertSame('Noogen', $item->name);
+        $this->assertSame('Noogen', $item->private['name']);
 
         // test: delete
         $rstr = $c->delete($req);
@@ -97,7 +97,7 @@ class TableControllerTest extends TestCase
         // var_dump($rstr);
         $this->assertInstanceOf(\Niiknow\Laratt\Models\TableModel::class, $rstr);
 
-        $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest$boom')->where('name', $pd['name'])->first();
+        $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest$boom')->where('uid', $rstc->uid)->first();
         $this->assertTrue(!isset($item));
 
         // truncate table

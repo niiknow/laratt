@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Cache as Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Niiknow\Laratt\Traits\CloudAuditable;
 use Niiknow\Laratt\Traits\SchedulableTrait;
 use Niiknow\Laratt\Traits\TableModelTrait;
@@ -19,13 +20,8 @@ class TableModel extends Model
      * @var array
      */
     protected $casts = [
-        'priority'   => 'integer',
-        'msrp'       => 'integer',
-        'price'      => 'integer',
-        'sale_price' => 'integer',
-        'meta'       => 'array',
-        'data'       => 'array',
-        'var'        => 'array'
+        'private' => 'array',
+        'public'  => 'array'
     ];
 
     /**
@@ -42,12 +38,7 @@ class TableModel extends Model
      * @var array
      */
     protected $fillable = [
-        'uid', 'name', 'label', 'teaser', 'group', 'started_at', 'ended_at', 'priority',
-        'title', 'summary', 'image_url', 'keywords', 'tags', 'hostnames', 'geos',
-        'week_schedules', 'analytic_code', 'imp_pixel', 'msrp', 'price',
-        'sale_price', 'sale_qty', 'skus', 'gtins', 'brands', 'cat1',
-        'cat2', 'cat3', 'cat4', 'map_coords', 'clk_url', 'content',
-        'data', 'meta', 'var'
+        'uid', 'private', 'public', 'started_at', 'ended_at'
     ];
 
     /**
@@ -73,69 +64,12 @@ class TableModel extends Model
                 // allow to uniquely identify this model
                 $table->string('uid', 50)->unique();
 
-                // example, name: home slider
-                $table->string('name')->nullable()->index();
-
-// label should be hidden from user, viewable by admin
-                // example: location x, y, and z home slider
-                $table->string('label')->nullable();
-                $table->string('teaser')->nullable();         // ex: sale sale sale
-                $table->string('group')->nullable()->index(); // ex: sales, daily
-                $table->timestamp('started_at')->nullable()->index();
+                $table->timestamp('started_at')->index();
                 $table->timestamp('ended_at')->nullable()->index();
-                $table->unsignedSmallInteger('priority')->default(100);
 
-                $table->string('title')->nullable();     // ex: box of chocolate
-                $table->string('summary')->nullable();   // ex: summay of box
-                $table->string('image_url')->nullable(); // ex: picture of box
-                $table->string('keywords')->nullable();
-
-// ex: valentine, birthday, ...
-
-                // targeting data, for advertising
-                $table->string('geos')->nullable();
-                $table->string('tags')->nullable();
-                $table->string('hostnames')->nullable(); // ex: example.com,go.com
-                $table->string('week_schedules')->nullable();
-
-// csv of 101 to 724
-
-                // tracking/impression
-                $table->string('analytic_code')->nullable(); // for google ua
-                $table->string('imp_pixel')->nullable();
-
-// track display
-
-                // ecommerce stuff, value should be in cents - no decimal
-                $table->unsignedInteger('msrp')->default(0);
-                $table->unsignedInteger('price')->default(0);
-                $table->unsignedInteger('sale_price')->default(0);
-                $table->unsignedSmallInteger('sale_qty')->default(1);
-                $table->string('skus')->nullable()->index();
-                $table->string('gtins')->nullable()->index();
-                $table->string('brands')->nullable();
-                $table->string('cat1')->nullable()->index();
-                $table->string('cat2')->nullable();
-                $table->string('cat3')->nullable();
-                $table->string('cat4')->nullable();
-                $table->string('map_coords')->nullable(); // hot map coordinates
-
+                $table->longText('private')->nullable();
+                $table->longText('public')->nullable();
                 $table->timestamps();
-
-                // conversion/click tracking url
-                $table->string('clk_url', 500)->nullable();
-
-                $table->mediumText('content')->nullable();
-
-// detail description of things
-
-// things that are hidden from the user
-                // like tax_group, ship_weight/length/height
-                $table->mediumText('meta')->nullable();
-                // things that are shown like extra images
-                $table->mediumText('data')->nullable();
-                // variant color, size, price, etc...
-                $table->mediumText('var')->nullable();
             });
 
             // cache database check for 45 minutes
@@ -143,5 +77,15 @@ class TableModel extends Model
         }
 
         return $tableNew;
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if ($model->uid === null || empty($model->uid)) {
+                $model->uid = (string) Str::uuid();
+            }
+        });
     }
 }

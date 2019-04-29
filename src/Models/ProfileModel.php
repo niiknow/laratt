@@ -6,6 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Cache as Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Niiknow\Laratt\Traits\CloudAuditable;
 use Niiknow\Laratt\Traits\TableModelTrait;
 
@@ -265,5 +266,16 @@ class ProfileModel extends Authenticatable
 
         $this->attributes['tfa_code']   = $value;
         $this->attributes['tfa_exp_at'] = Carbon::now()->addMinutes(10);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if ($model->uid === null || empty($model->uid)) {
+                $model->uid = Str::slug($model->email);
+            }
+        });
     }
 }

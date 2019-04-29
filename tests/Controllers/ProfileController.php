@@ -13,6 +13,7 @@ class ProfileController
      * @var array
      */
     protected $vrules = [
+        'uid'                      => 'nullable|string|max:50',
         'email'                    => 'required|email|max:190',
         'email_verified_at'        => 'nullable|date',
         'seen_at'                  => 'nullable|date',
