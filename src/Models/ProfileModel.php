@@ -50,7 +50,7 @@ class ProfileModel extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'uid', 'email', 'email_verified_at', 'password', 'image_url',
+        'uid', 'email', 'email_verified_at', 'password', 'photo_url',
         'phone_country_code', 'phone', 'group', 'tfa_type', 'authy_id', 'authy_status',
         'tfa_code', 'tfa_exp_at',
 
@@ -58,7 +58,7 @@ class ProfileModel extends Authenticatable
         'postal', 'city', 'state', 'country', 'email_list_optin_at',
         'is_retired_or_unemployed', 'occupation', 'employer',
 
-        'card_customer_id', 'card_brand', 'card_last4',
+        'pay_customer_id', 'pay_type', 'pay_brand', 'pay_last4', 'pay_month', 'pay_year',
         'data', 'meta', 'seen_at', 'access'
     ];
 
@@ -83,15 +83,13 @@ class ProfileModel extends Authenticatable
             Schema::create($tableNew, function (Blueprint $table) {
                 $table->increments('id');
 
-// client/consumer/external primary key
-
-// this allow client to prevent duplicate
+                // client/consumer/external primary key
+                // this allow client to prevent duplicate
                 // for example, duplicate during bulk import
                 $table->string('uid', 50)->unique();
 
-// the list of fields below has been carefully
-
-// choosen to support profile including
+                // the list of fields below has been carefully
+                // choosen to support profile including
                 // ecommerce and federal donation system
                 $table->string('email')->unique();
                 $table->timestamp('email_verified_at')->nullable();
@@ -101,7 +99,7 @@ class ProfileModel extends Authenticatable
                 $table->timestamp('password_updated_at')->nullable();
 
                 // profile image and two factor auth phone
-                $table->string('image_url')->nullable();
+                $table->string('photo_url')->nullable();
                 $table->string('phone_country_code', 5)->default('1');
                 $table->string('phone', 20)->nullable();
 
@@ -138,9 +136,12 @@ class ProfileModel extends Authenticatable
                 $table->string('occupation')->nullable();
                 $table->string('employer')->nullable();
 
-                $table->string('card_customer_id')->nullable();
-                $table->string('card_brand', 50)->nullable();
-                $table->string('card_last4', 4)->nullable();
+                $table->string('pay_customer_id')->nullable();
+                $table->string('pay_type')->nullable();
+                $table->string('pay_brand', 50)->nullable();
+                $table->string('pay_last4', 4)->nullable();
+                $table->unsignedInteger('pay_month')->nullable();
+                $table->unsignedInteger('pay_year')->nullable();
 
                 // extra meta to store things like social provider
                 $table->mediumText('meta')->nullable();
@@ -158,20 +159,6 @@ class ProfileModel extends Authenticatable
         return $tableNew;
     }
 
-    // reset authy id
-
-    /**
-     * @param $value
-     */
-    public function getImageUrlAttribute($value)
-    {
-        $defaultUrl = 'https://www.gravatar.com/avatar/' . md5(mb_strtolower($this->email)) . '.jpg?s=200&d=mm';
-
-        return !isset($value)
-        || strlen($value) <= 0
-        || strpos($value, 'http') === false ? $defaultUrl : url($value);
-    }
-
     /**
      * @param  $value
      * @return mixed
@@ -181,7 +168,20 @@ class ProfileModel extends Authenticatable
         return $this->first_name . ' ' . $this->last_name;
     }
 
-    // <tfa
+    // reset authy id
+
+    /**
+     * @param $value
+     */
+    public function getPhotoUrlAttribute($value)
+    {
+        $defaultUrl = 'https://www.gravatar.com/avatar/' . md5(mb_strtolower($this->email)) . '.jpg?s=200&d=mm';
+
+        return !isset($value)
+        || strlen($value) <= 0
+        || strpos($value, 'http') === false ? $defaultUrl : url($value);
+    }
+
     /**
      * @return mixed
      */
@@ -263,9 +263,7 @@ class ProfileModel extends Authenticatable
             $value = $this->generateTfaCode();
         }
 
-        $this->attributes['tfa_code'] = $value;
-
-        // </tfa
+        $this->attributes['tfa_code']   = $value;
         $this->attributes['tfa_exp_at'] = Carbon::now()->addMinutes(10);
     }
 }

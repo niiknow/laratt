@@ -16,7 +16,7 @@ class ProfileController
         'email'                    => 'required|email|max:190',
         'email_verified_at'        => 'nullable|date',
         'seen_at'                  => 'nullable|date',
-        'image_url'                => 'nullable|url|max:190',
+        'photo_url'                => 'nullable|url|max:190',
         'phone_country_code'       => 'nullable|regex:/^(\+?\d{1,3}|\d{1,4})$/',
         'phone'                    => 'nullable|regex:/\d{7,20}+/',
         'group'                    => 'nullable|string|max:190',
@@ -42,9 +42,12 @@ class ProfileController
         'occupation'               => 'nullable|string|max:190',
         'employer'                 => 'nullable|string|max:190',
 
-        'card_customer_id'         => 'nullable|string|max:190',
-        'card_brand'               => 'nullable|string|max:50',
-        'card_last4'               => 'nullable|string|max:4',
+        'pay_customer_id'          => 'nullable|string|max:190',
+        'pay_type'                 => 'nullable|string|max:190',
+        'pay_brand'                => 'nullable|string|max:50',
+        'pay_last4'                => 'nullable|string|max:4',
+        'pay_month'                => 'nullable|string|max:2',
+        'pay_year'                 => 'nullable|string|max:4',
         'data.*'                   => 'nullable',
         'meta.*'                   => 'nullable'
     ];
