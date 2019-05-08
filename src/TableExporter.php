@@ -39,8 +39,13 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
             list($cols, $acols) = $model->getExportable();
         }
 
-        $this->query = new \Illuminate\Database\Eloquent\Builder($query);
-        $this->query->setModel($model);
+        if ($query instanceof \Illuminate\Database\Eloquent\Builder) {
+            $this->query = $query;
+        } else {
+            $this->query = new \Illuminate\Database\Eloquent\Builder($query);
+            $this->query->setModel($model);
+        }
+
         $this->headings = $cols;
         $this->acols    = $acols;
     }
