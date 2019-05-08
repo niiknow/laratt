@@ -52,15 +52,16 @@ trait ApiTableTrait
         // \Log::info($inputs);
         $dt            = DataTables::of($query);
         $action        = $request->query('action');
-        $encode        = $request->query('encode');
         $escapeColumns = $request->query('escapeColumns');
+        $eColumns      = [];
 
-        if (!isset($encode)) {
-            $dt = $dt->escapeColumns([]);
+        if ($escapeColumns !== null) {
+            $ecolumns = explode(',', $escapeColumns);
         }
 
+        $dt = $dt->escapeColumns($ecolumns);
+
         if (isset($action)) {
-// <begin_controller_actions
             if (!$request->query('length')) {
                 $dt = $dt->skipPaging();
             }
@@ -448,8 +449,6 @@ trait ApiTableTrait
                 throw new LarattException(__('exceptions.table.does_not_match'));
             }
         }
-
-        // </end
 
         return $inputs;
     }
