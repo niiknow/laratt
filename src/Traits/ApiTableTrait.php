@@ -52,6 +52,7 @@ trait ApiTableTrait
         // \Log::info($inputs);
         $dt            = DataTables::of($query);
         $action        = $request->query('action');
+        $encode        = $request->query('encode');
         $escapeColumns = $request->query('escapeColumns');
 
         if (!isset($encode)) {
