@@ -62,7 +62,7 @@ trait ApiTableTrait
         $dt = $dt->escapeColumns($ecolumns);
 
         if (isset($export)) {
-            if (!$request->query('length')) {
+            if ($request->query('length') === null) {
                 $dt = $dt->skipPaging();
             }
 
