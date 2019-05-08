@@ -18,7 +18,7 @@ class TenancyResolver
             $tenant = call_user_func($resolver);
         } else {
             $req    = request();
-            $tenant = $req->header('x-tenant') || $req->query('x-tenant');
+            $tenant = $req->header('x-tenant') ?? $req->query('x-tenant');
         }
 
         if (!isset($tenant)) {
