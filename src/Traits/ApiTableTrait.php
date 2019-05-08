@@ -51,7 +51,7 @@ trait ApiTableTrait
 
         // \Log::info($inputs);
         $dt            = DataTables::of($query);
-        $action        = $request->query('action');
+        $export        = $request->query('export');
         $escapeColumns = $request->query('escapeColumns');
         $eColumns      = [];
 
@@ -61,7 +61,7 @@ trait ApiTableTrait
 
         $dt = $dt->escapeColumns($ecolumns);
 
-        if (isset($action)) {
+        if (isset($export)) {
             if (!$request->query('length')) {
                 $dt = $dt->skipPaging();
             }
