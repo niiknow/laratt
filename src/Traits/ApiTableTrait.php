@@ -56,10 +56,10 @@ trait ApiTableTrait
         $eColumns      = [];
 
         if ($escapeColumns !== null) {
-            $ecolumns = explode(',', $escapeColumns);
+            $eColumns = explode(',', $escapeColumns);
         }
 
-        $dt = $dt->escapeColumns($ecolumns);
+        $dt = $dt->escapeColumns($eColumns);
 
         if (isset($export)) {
             if ($request->query('length') === null) {
