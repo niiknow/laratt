@@ -2,6 +2,9 @@
 
 return [
     'resolver'     => '',
+    'export'       => [
+        'exts' => 'xlsx,ods,csv'
+    ],
     'audit'        => [
         'disk'    => env('AUDIT_DISK', 's3'),
         'bucket'  => env('AUDIT_BUCKET'),

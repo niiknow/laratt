@@ -67,7 +67,10 @@ trait ApiTableTrait
             }
 
             // get the table name from model
-            $request->validate(['export' => 'required|in:xlsx,ods,csv']);
+            $request->validate([
+                'export' => 'required|in:'
+                . config('laratt.export.exts', 'xlsx,ods,csv')
+            ]);
             $query = $dt->getFilteredQuery();
             $file  = $table . '-' . time() . '.' . $action;
 
