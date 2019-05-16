@@ -72,7 +72,7 @@ trait ApiTableTrait
                 . config('laratt.export.exts', 'xlsx,ods,csv')
             ]);
             $query = $dt->getFilteredQuery();
-            $file  = $table . '-' . time() . '.' . $action;
+            $file  = $table . '-' . time() . '.' . $export;
 
             return \Maatwebsite\Excel\Facades\Excel::download(
                 new TableExporter($query, $item),
