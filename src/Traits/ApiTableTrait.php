@@ -19,9 +19,6 @@ use Yajra\DataTables\DataTables;
 
 trait ApiTableTrait
 {
-    // length must be greater than 3 and less than 30
-
-// reserved tables: profile, user, recipe, tables
     /**
      * create a record
      *
@@ -49,7 +46,6 @@ trait ApiTableTrait
             $query = $query->where($tf, $tn);
         }
 
-        // \Log::info($inputs);
         $dt            = DataTables::of($query);
         $export        = $request->query('export');
         $escapeColumns = $request->query('escapeColumns');
@@ -134,9 +130,6 @@ trait ApiTableTrait
             return $this->rsp(422, $validator->errors());
         }
 
-// validate action must be in xlsx, ods, csv
-        // \Log::info($inputs);
-
         $file = $request->file('file')->openFile();
         $csv  = \League\Csv\Reader::createFromFileObject($file)
             ->setHeaderOffset(0);
@@ -150,10 +143,6 @@ trait ApiTableTrait
             $this->vrules
         );
 
-// if we cannot find item, do insert
-
-// validate that the file import is required
-
         if ($rsp['code'] === 422) {
             return $this->rsp(422, $rsp);
         }
@@ -163,12 +152,6 @@ trait ApiTableTrait
             $this->getTableName(),
             $this->getIdField()
         );
-
-// $start_memory = memory_get_usage();
-
-// \Log::info("import - processing: $start_memory");
-
-        // $used_memory = (memory_get_usage() - $start_memory) / 1024 / 1024;
 
         return $this->rsp($rsp['code'], $rsp);
     }
@@ -270,14 +253,12 @@ trait ApiTableTrait
             $inputs[$tf] = $this->getTableName();
         }
 
-        // \Log::info("import - before save: $used_memory");
         $item = $this->getModel($inputs);
 
         if (isset($id)) {
             $input[$this->getIdField()] = $id;
             $item                       = $this->findById($id, true);
 
-// $used_memory = (memory_get_usage() - $start_memory) / 1024 / 1024;
             if (isset($item)) {
                 $item->fill($inputs);
             } else {
@@ -303,12 +284,13 @@ trait ApiTableTrait
         $loadIncludes = false
     ) {
         $item = $this->getQuery()
-                     ->where($this->getIdField(), $id)->first();
+                     ->where($this->getIdField(), $id)
+                     ->first();
 
         if ($loadIncludes && isset($item)) {
             $includes = $this->getIncludes();
             if (count($includes) > 0) {
-                $item->load($includes);
+                $item->loadMissing($includes);
             }
         }
 
@@ -412,8 +394,6 @@ trait ApiTableTrait
     {
         $table = request()->route('table');
 
-// \Log::info("import - after save: $used_memory");
-        // import success response
         $rules = [
             'table' => 'required|regex:/[a-z0-9_]{3,30}/|not_in:profile,user,recipe,tables'
         ];
