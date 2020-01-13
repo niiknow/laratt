@@ -54,7 +54,7 @@ This library provide simple query endpoint for search and bulk delete: `api/v1/p
 
 ### Limiting
 
-To limit the number of returned resources to a specific amount:
+To limit the number of returned resources to a specific amount with keyword `limit` or `per_page`:
 
 ```
 /query?limit=10
