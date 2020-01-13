@@ -49,7 +49,12 @@ class RequestQueryBuilder
         $this->applyRequestFilters($request);
         $this->applyRequestSorts($request);
 
+        // use limit or per_page
         $limit = $request->query('limit');
+        if (!$limit) {
+            $limit = $request->query('per_page');
+        }
+
         if ($limit && is_numeric($limit)) {
             $limit = intVal($limit);
         } else {
@@ -319,8 +324,10 @@ class RequestQueryBuilder
      */
     protected function applyRequestSort($sort)
     {
+        $sortSep = (strpos($sort, ':') !== false) ? ':' : '|';
+
         list($column, $direction) = array_pad(
-            explode(':', trim($sort), 2),
+            explode($sortSep, trim($sort), 2),
             2,
             null
         );

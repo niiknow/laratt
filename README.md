@@ -66,14 +66,14 @@ To limit the number of returned resources to a specific amount:
 To sort the resources by a column in ascending or descending order:
 
 ```
-/query?sort[]=column:asc
-/query?sort[]=column:desc
+/query?sort[]=column|asc
+/query?sort[]=column|desc
 ```
 
 You could also have multiple sort queries:
 
 ```
-/query?sort[]=column1:asc&sort[]=column2:desc
+/query?sort[]=column1|asc&sort[]=column2|desc
 ```
 
 ### Filtering
