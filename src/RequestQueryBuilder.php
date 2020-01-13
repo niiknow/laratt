@@ -74,7 +74,7 @@ class RequestQueryBuilder
 
         // \Log::info($qb->columns);
 
-        return $this->builder->simplePaginate(
+        return $this->builder->paginate(
             $limit,
             $this->columns,
             'page',
