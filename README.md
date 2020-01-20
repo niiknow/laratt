@@ -121,6 +121,49 @@ For `AND` clauses, use another `filter[]` query.
 /query?filter[]=column1:operator:value1&filter[]=column2:operator:value2
 ```
 
+# RequestQueryBuilder server-side usage
+Below demo ficticious server-side DonationController that provide Laravel Paginate json data for some client-side ui.
+
+```php
+<?php
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use App\Models;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Niiknow\Laratt\RequestQueryBuilder;
+
+class DonationController extends Controller
+{
+    /**
+     * Method return donor transaction history
+     *
+     * @param Request  $request
+     */
+    public function index(Request $request)
+    {
+        $user  = \Auth::user();
+        $query = \App\Models\Donation::select(
+            [
+                'donations.id',
+                'donations.amount',
+                'donations.recurrence_period',
+                'donations.created_at',
+                'donations.txn_id',
+                'donations.txn_type',
+                'projects.name as name'
+            ]
+        )->Where('donor_id', $user->id)
+         ->leftJoin('projects', 'donations.project_id', '=', 'projects.id');
+
+        $qb = new RequestQueryBuilder($query);
+
+        return $qb->applyRequest($request);
+    }
+}
+```
+
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
