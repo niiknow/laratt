@@ -210,6 +210,9 @@ class ProfileControllerTest extends TestCase
             ->with('limit')
             ->andReturn(null);
         $req->shouldReceive('query')
+            ->with('per_page')
+            ->andReturn(null);
+        $req->shouldReceive('query')
             ->with('page')
             ->andReturn(null);
         $req->shouldReceive('query')
@@ -263,6 +266,9 @@ class ProfileControllerTest extends TestCase
             ->andReturn('id:lte:8');
         $req->shouldReceive('query')
             ->with('limit')
+            ->andReturn(null);
+        $req->shouldReceive('query')
+            ->with('per_page')
             ->andReturn(null);
         $req->shouldReceive('query')
             ->with('page')
