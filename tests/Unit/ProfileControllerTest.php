@@ -134,7 +134,7 @@ class ProfileControllerTest extends TestCase
                 'meta.domain' => $faker->domainWord
             ];
 
-            $data .= '"' . implode($fakedata, '","') . "\"\n";
+            $data .= '"' . implode('","', $fakedata) . "\"\n";
         }
 
         // test: list all
