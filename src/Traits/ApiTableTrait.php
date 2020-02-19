@@ -46,6 +46,13 @@ trait ApiTableTrait
             $query = $query->where($tf, $tn);
         }
 
+        // exclude soft deleted items
+        $traits          = class_uses($item);
+        $usesSoftDeletes = in_array('Illuminate\Database\Eloquent\SoftDeletingTrait', $traits, true);
+        if ($usesSoftDeletes) {
+            $query = $query->whereNull('deleted_at');
+        }
+
         $dt            = DataTables::of($query);
         $export        = $request->query('export');
         $escapeColumns = $request->query('escapeColumns');
