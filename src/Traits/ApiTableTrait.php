@@ -47,10 +47,12 @@ trait ApiTableTrait
         }
 
         // exclude soft deleted items
-        $traits          = class_uses($item);
-        $usesSoftDeletes = in_array('Illuminate\Database\Eloquent\SoftDeletingTrait', $traits, true);
-        if ($usesSoftDeletes) {
-            $query = $query->whereNull('deleted_at');
+        if (!config('laratt.api_return_soft_deletes', false)) {
+            $traits          = class_uses($item);
+            $usesSoftDeletes = in_array('Illuminate\Database\Eloquent\SoftDeletes', $traits, true);
+            if ($usesSoftDeletes) {
+                $query = $query->whereNull('deleted_at');
+            }
         }
 
         $dt            = DataTables::of($query);

@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'resolver'              => '',
-    'export'                => [
+    'resolver'                => '',
+    'export'                  => [
         'exts' => 'xlsx,ods,csv'
     ],
-    'audit'                 => [
+    'audit'                   => [
         'disk'    => env('AUDIT_DISK', 's3'),
         'bucket'  => env('AUDIT_BUCKET'),
         'include' => [
@@ -17,6 +17,6 @@ return [
             'tenant' => null
         ]
     ],
-    'import_limit'          => 9999,
-    'api_list_show_deletes' => false
+    'import_limit'            => 9999,
+    'api_return_soft_deletes' => false
 ];
