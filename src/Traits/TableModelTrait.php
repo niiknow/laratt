@@ -30,6 +30,49 @@ trait TableModelTrait
     }
 
     /**
+     * @param  $tenant
+     * @param  $tableName
+     * @param  $tableCreateFunction
+     * @return mixed
+     */
+    public function createTableIfNotExists(
+        $tenant,
+        $tableName,
+        $schemaFunction = null
+    ) {
+        $tableNew = null;
+
+        // invalid tenant, exit - throw exception?
+        if (isset($tenant) && !empty($tenant) && strlen($tenant) < 3) {
+            return $tableNew;
+        }
+
+        // invalid table name, exit - throw exception?
+        if (isset($tableName) && !empty($tableName) && strlen($tableName) < 3) {
+            return $tableNew;
+        }
+
+        $tableNew = $this->setTableName($tenant, $tableName);
+
+// only need to improve performance in prod
+        if (strpos(config('env'), 'pr') === 0 && \Cache::has('tnc_' . $tableNew)) {
+            return $tableNew;
+        }
+
+        if (!Schema::hasTable($tableNew)) {
+            if (isset($schemaFunction) && is_callable($schemaFunction)) {
+                Schema::create($tableNew, $schemaFunction);
+            } else if (method_exists($this, 'createTable')) {
+                $this->createTable($tableNew);
+            }
+        }
+
+        \Cache::add('tnc_' . $tableNew, 'true', 45 * 60);
+
+        return $tableNew;
+    }
+
+    /**
      * @param $tenant
      * @param $tableName
      */
@@ -281,20 +324,6 @@ trait TableModelTrait
     public function setUidAttribute($value)
     {
         $this->attributes['uid'] = Str::slug($value);
-    }
-
-    /**
-     * @param  $table
-     * @param  $tenant
-     * @return mixed
-     */
-    public function tableCreate(
-        $table,
-        $tenant = null
-    ) {
-        $this->createTableIfNotExists($tenant, $table);
-
-        return $this;
     }
 
     /**

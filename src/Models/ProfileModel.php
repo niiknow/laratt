@@ -4,7 +4,6 @@ namespace Niiknow\Laratt\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Cache as Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Niiknow\Laratt\Traits\CloudAuditable;
@@ -64,100 +63,83 @@ class ProfileModel extends Authenticatable
     ];
 
     /**
-     * @param  $tenant
-     * @param  $tableName
-     * @return mixed
+     * @param  $tableNew
+     * @return void
      */
-    public function createTableIfNotExists(
-        $tenant,
-        $tableName = 'profile'
+    public function createTable(
+        $tableNew
     ) {
-        $tableName = 'profile';
-        $tableNew  = $this->setTableName($tenant, $tableName);
+        Schema::create($tableNew, function (Blueprint $table) {
+            $table->increments('id');
 
-// only need to improve performance in prod
-        if (config('env') === 'production' && \Cache::has('tnc_' . $tableNew)) {
-            return $tableNew;
-        }
+            // client/consumer/external primary key
+            // this allow client to prevent duplicate
+            // for example, duplicate during bulk import
+            $table->string('uid', 50)->unique();
 
-        if (!Schema::hasTable($tableNew)) {
-            Schema::create($tableNew, function (Blueprint $table) {
-                $table->increments('id');
+            // the list of fields below has been carefully
+            // choosen to support profile including
+            // ecommerce and federal donation system
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('seen_at')->nullable();
 
-                // client/consumer/external primary key
-                // this allow client to prevent duplicate
-                // for example, duplicate during bulk import
-                $table->string('uid', 50)->unique();
+            $table->string('password')->nullable();
+            $table->timestamp('password_updated_at')->nullable();
 
-                // the list of fields below has been carefully
-                // choosen to support profile including
-                // ecommerce and federal donation system
-                $table->string('email')->unique();
-                $table->timestamp('email_verified_at')->nullable();
-                $table->timestamp('seen_at')->nullable();
+            // profile image and two factor auth phone
+            $table->string('photo_url')->nullable();
+            $table->string('phone_country_code', 5)->default('1');
+            $table->string('phone', 20)->nullable();
 
-                $table->string('password')->nullable();
-                $table->timestamp('password_updated_at')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
 
-                // profile image and two factor auth phone
-                $table->string('photo_url')->nullable();
-                $table->string('phone_country_code', 5)->default('1');
-                $table->string('phone', 20)->nullable();
+            // field allowing for two factor auth
+            $table->enum('tfa_type', [
+                'off', 'email', 'sms', 'call', 'google_soft_token', 'authy_soft_token', 'authy_onetouch'
+            ])->default('off');
+            $table->string('authy_id')->unique()->nullable();
+            $table->string('authy_status')->nullable();
+            $table->string('tfa_code')->nullable();
+            $table->timestamp('tfa_exp_at')->nullable();
 
-                $table->string('first_name')->nullable();
-                $table->string('last_name')->nullable();
+            // member, admin, etc...
+            $table->string('group')->nullable()->index();
+            $table->string('access')->default('member');
 
-                // field allowing for two factor auth
-                $table->enum('tfa_type', [
-                    'off', 'email', 'sms', 'call', 'google_soft_token', 'authy_soft_token', 'authy_onetouch'
-                ])->default('off');
-                $table->string('authy_id')->unique()->nullable();
-                $table->string('authy_status')->nullable();
-                $table->string('tfa_code')->nullable();
-                $table->timestamp('tfa_exp_at')->nullable();
+            // federally required donation contact info
+            $table->string('email_alt')->nullable();
+            $table->string('address1')->nullable();
+            $table->string('address2')->nullable();
+            $table->string('postal', 50)->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('country')->nullable();
+            $table->double('lat', 11, 8)->nullable();
+            $table->double('lng', 11, 8)->nullable();
 
-                // member, admin, etc...
-                $table->string('group')->nullable()->index();
-                $table->string('access')->default('member');
+            // email subscription and federal required donation contact
+            $table->timestamp('email_list_optin_at')->nullable();
+            $table->boolean('is_retired_or_unemployed')->default(0);
+            $table->string('occupation')->nullable();
+            $table->string('employer')->nullable();
 
-                // federally required donation contact info
-                $table->string('email_alt')->nullable();
-                $table->string('address1')->nullable();
-                $table->string('address2')->nullable();
-                $table->string('postal', 50)->nullable();
-                $table->string('city')->nullable();
-                $table->string('state')->nullable();
-                $table->string('country')->nullable();
-                $table->double('lat', 11, 8)->nullable();
-                $table->double('lng', 11, 8)->nullable();
+            $table->string('pay_customer_id')->nullable();
+            $table->string('pay_type')->nullable();
+            $table->string('pay_brand', 50)->nullable();
+            $table->string('pay_last4', 4)->nullable();
+            $table->unsignedInteger('pay_month')->nullable();
+            $table->unsignedInteger('pay_year')->nullable();
 
-                // email subscription and federal required donation contact
-                $table->timestamp('email_list_optin_at')->nullable();
-                $table->boolean('is_retired_or_unemployed')->default(0);
-                $table->string('occupation')->nullable();
-                $table->string('employer')->nullable();
+            // extra meta to store things like social provider
+            $table->mediumText('meta')->nullable();
+            // extra data/attribute about the user
+            $table->mediumText('data')->nullable();
 
-                $table->string('pay_customer_id')->nullable();
-                $table->string('pay_type')->nullable();
-                $table->string('pay_brand', 50)->nullable();
-                $table->string('pay_last4', 4)->nullable();
-                $table->unsignedInteger('pay_month')->nullable();
-                $table->unsignedInteger('pay_year')->nullable();
-
-                // extra meta to store things like social provider
-                $table->mediumText('meta')->nullable();
-                // extra data/attribute about the user
-                $table->mediumText('data')->nullable();
-
-                $table->timestamps();
-                $table->rememberToken();
-            });
-
-            // cache database check for 45 minutes
-            \Cache::add('tnc_' . $tableNew, 'true', 45);
-        }
-
-        return $tableNew;
+            $table->timestamps();
+            $table->rememberToken();
+        });
     }
 
     /**

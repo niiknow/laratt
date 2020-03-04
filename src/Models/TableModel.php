@@ -3,7 +3,6 @@ namespace Niiknow\Laratt\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Cache as Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Niiknow\Laratt\Traits\CloudAuditable;
@@ -42,41 +41,25 @@ class TableModel extends Model
     ];
 
     /**
-     * @param  $tenant
-     * @param  $tableName
-     * @return mixed
+     * @param  $tableNew
+     * @return void
      */
-    public function createTableIfNotExists(
-        $tenant,
-        $tableName
+    public function createTable(
+        $tableNew
     ) {
-        $tableNew = $this->setTableName($tenant, $tableName);
+        Schema::create($tableNew, function (Blueprint $table) {
+            $table->increments('id');
 
-// only need to improve performance in prod
-        if (config('env') === 'production' && \Cache::has($tableNew)) {
-            return $tableNew;
-        }
+            // allow to uniquely identify this model
+            $table->string('uid', 50)->unique();
 
-        if (!Schema::hasTable($tableNew)) {
-            Schema::create($tableNew, function (Blueprint $table) {
-                $table->increments('id');
+            $table->timestamp('started_at')->nullable()->index();
+            $table->timestamp('ended_at')->nullable()->index();
 
-                // allow to uniquely identify this model
-                $table->string('uid', 50)->unique();
-
-                $table->timestamp('started_at')->index();
-                $table->timestamp('ended_at')->nullable()->index();
-
-                $table->longText('private')->nullable();
-                $table->longText('public')->nullable();
-                $table->timestamps();
-            });
-
-            // cache database check for 45 minutes
-            \Cache::add($tableNew, 'true', 45);
-        }
-
-        return $tableNew;
+            $table->longText('private')->nullable();
+            $table->longText('public')->nullable();
+            $table->timestamps();
+        });
     }
 
     protected static function boot()
