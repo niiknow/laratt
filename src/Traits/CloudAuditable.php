@@ -98,7 +98,7 @@ trait CloudAuditable
     public function cloudAudit($action, $log = [])
     {
         $id  = $this->id;
-        $uid = $this->uid;
+        $uid = $this->{$this->getUidName()};
         if (!isset($id) || !isset($uid)) {
             return;
         }
@@ -204,7 +204,7 @@ trait CloudAuditable
         if ($model) {
             $body['custom'] = $model;
         } else {
-            $body['uid']      = $this->uid;
+            $body['uid']      = $this->{$this->getUidName()};
             $body['model_id'] = $this->id;
             $body['model']    = $this->toArray();
             $body['info']     = $this->getCloudAuditInfo() ?: [];

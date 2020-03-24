@@ -22,9 +22,11 @@ trait TableModelTrait
     public static function bootTableModelTrait()
     {
         static::creating(function ($model) {
-            if (!isset($model->uid)) {
+            $uidName = $model->getUidName();
+
+            if (!isset($model->{$uidName})) {
                 // automatically add uid if not provided
-                $model->uid = (string) Str::uuid();
+                $model->{$uidName} = (string) Str::uuid();
             }
         });
     }
@@ -108,6 +110,16 @@ trait TableModelTrait
     }
 
     /**
+     * Get the uid field name
+     *
+     * @return [type] [description]
+     */
+    public function getUidName()
+    {
+        return 'uid';
+    }
+
+    /**
      * process the csv records
      *
      * @param  array  $csv    the csv rows data
@@ -173,13 +185,17 @@ trait TableModelTrait
      * @param $table
      * @param $idField
      */
-    public function saveImport(&$data, $table, $idField = 'uid')
+    public function saveImport(&$data, $table, $idField = null)
     {
         $inserted = [];
         $updated  = [];
         $skipped  = [];
         $rowno    = 1;
         $row      = [];
+
+        if ($idField === null) {
+            $idField = $this->getUidName();
+        }
 
         \DB::beginTransaction();
         try {
@@ -241,8 +257,12 @@ trait TableModelTrait
      * @param $table
      * @param $idField
      */
-    public function saveImportItem(&$inputs, $table, $idField = 'uid')
+    public function saveImportItem(&$inputs, $table, $idField = null)
     {
+        if ($idField === null) {
+            $idField = $this->getUidName();
+        }
+
         $model = get_class($this);
         $stat  = 'insert';
         $id    = isset($inputs[$idField]) ? $inputs[$idField] : null;
@@ -319,6 +339,8 @@ trait TableModelTrait
     }
 
     /**
+     * Set uid field and make sure it's a slug
+     *
      * @param $value
      */
     public function setUidAttribute($value)
@@ -341,7 +363,7 @@ trait TableModelTrait
         $tn    = $this->getTable();
         $query = $this->query();
         $query = $query->setModel($this);
-        $item  = $query->where('uid', $uid)->first();
+        $item  = $query->where($this->getUidName(), $uid)->first();
         if (isset($item)) {
             $item->setTableName($tenant, $table);
         }
