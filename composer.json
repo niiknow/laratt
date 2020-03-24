@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": ">=7.2",
-        "laravel/framework": "^5.1|^6|^7",
+        "laravel/framework": ">=5.1",
         "league/csv": "^9.2",
         "maatwebsite/excel": "^3.1",
         "yajra/laravel-datatables-oracle": "~9.0"
