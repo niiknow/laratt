@@ -139,7 +139,7 @@ class ProfileControllerTest extends TestCase
 
         // test: list all
         file_put_contents($filePath, $data);
-        $file = new \Illuminate\Http\UploadedFile($filePath, 'test.csv', null, null, null, true);
+        $file = new \Illuminate\Http\UploadedFile($filePath, 'test.csv', null, null, true);
 
         $c   = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
         $req = $this->getRequest('profile');

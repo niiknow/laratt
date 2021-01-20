@@ -64,7 +64,7 @@ trait TableModelTrait
         if (!Schema::hasTable($tableNew)) {
             if (isset($schemaFunction) && is_callable($schemaFunction)) {
                 Schema::create($tableNew, $schemaFunction);
-            } else if (method_exists($this, 'createTable')) {
+            } elseif (method_exists($this, 'createTable')) {
                 $this->createTable($tableNew);
             }
         }
