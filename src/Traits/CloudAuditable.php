@@ -184,6 +184,16 @@ trait CloudAuditable
      */
     public function cloudAuditWrite($action, $log = [], $model = null, $filename = null)
     {
+        $bucket = config('laratt.audit.bucket');
+        if (!isset($bucket) || strlen($bucket) <= 0) {
+            return $this;
+        }
+
+        $disk = config('laratt.audit.disk');
+        if (!isset($disk) || strlen($disk) <= 0) {
+            return $this;
+        }
+
         $table = $this->getTable();
 
         if (!isset($filename)) {
@@ -210,15 +220,6 @@ trait CloudAuditable
             $body['info']     = $this->getCloudAuditInfo() ?: [];
         }
 
-        $bucket = config('laratt.audit.bucket');
-        if (!isset($bucket) || strlen($bucket) <= 0) {
-            return $this;
-        }
-
-        $disk = config('laratt.audit.disk');
-        if (!isset($disk) || strlen($disk) <= 0) {
-            return $this;
-        }
 
         // right now, only support s3
         \Storage::disk($disk)
