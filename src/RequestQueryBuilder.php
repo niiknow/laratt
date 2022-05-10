@@ -91,10 +91,9 @@ class RequestQueryBuilder
         if (isset($sel)) {
             // do not allow caps in column name
             $sel     = mb_strtolower($sel);
-            $pattern = '/[^a-z0-9_\*]+/i';
             $cols    = collect(explode(',', $sel))->map(function ($col) {
                 // sanitize column name
-                return trim(preg_replace($pattern, '', $col));
+                return trim(preg_replace('/[^a-z0-9_\*]+/i', '', $col));
             })->filter(function ($col) {
                 // only return valid column name
                 return strlen($col) > 0;
