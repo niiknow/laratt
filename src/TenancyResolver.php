@@ -5,25 +5,42 @@ class TenancyResolver
 {
     /**
      * Method for resolving tenant
-     * @return
+     *
+     * @param  boolean $throwError throw error if tenant not found
+     * @return string
      */
-    public static function resolve()
+    public static function resolve($throwError = false)
     {
         // @codeCoverageIgnoreStart
-        $resolver = config('laratt.resolver', '');
 
-        if (!empty($resolver)
-            && (strpos($resolver, 'niiknow') === false)
-            && is_callable($resolver)) {
-            $tenant = call_user_func($resolver);
-        } else {
-            $req    = request();
+        // attempt resolve by request
+        $req    = request();
+        $tenant = '';
+        if (isset($req)) {
             $tenant = $req->header('x-tenant') ?? $req->query('x-tenant');
         }
 
-        if (!isset($tenant)) {
-            $tenant = '';
+        // attempt resolve by resolver
+        if (!isset($tenant) || empty($tenant)) {
+            $resolver = config('laratt.resolver', '');
+
+            if (!empty($resolver)
+                && (strpos($resolver, 'niiknow') === false)
+                && is_callable($resolver)) {
+                $tenant = call_user_func($resolver);
+            }
         }
+
+        // throw error if not found
+        if (!isset($tenant) || empty($tenant)) {
+            if ($throwError) {
+                throw new HttpException(403, 'x-tenant is required.', null, null);
+            }
+        }
+
+        // @codeCoverageIgnoreEnd
+
+        return self::slug($tenant);
 
         // @codeCoverageIgnoreEnd
 
