@@ -34,7 +34,7 @@ class TenancyResolver
         // throw error if not found
         if (!isset($tenant) || empty($tenant)) {
             if ($throwError) {
-                throw new HttpException(403, 'x-tenant is required.', null, null);
+                throw new \Symfony\Component\HttpKernel\Exception\HttpException(403, 'x-tenant is required.', null, null);
             }
         }
 
