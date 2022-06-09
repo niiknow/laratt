@@ -1,4 +1,5 @@
 <?php
+
 namespace Niiknow\Laratt\Tests\Controllers;
 
 use Niiknow\Laratt\Models\ProfileModel;
@@ -50,7 +51,7 @@ class ProfileController
         'pay_month'                => 'nullable|string|max:2',
         'pay_year'                 => 'nullable|string|max:4',
         'data.*'                   => 'nullable',
-        'meta.*'                   => 'nullable'
+        'meta.*'                   => 'nullable',
     ];
 
     /**

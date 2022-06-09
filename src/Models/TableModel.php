@@ -1,4 +1,5 @@
 <?php
+
 namespace Niiknow\Laratt\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Niiknow\Laratt\Traits\TableModelTrait;
 class TableModel extends Model
 {
     use CloudAuditable,
-    SchedulableTrait,
+        SchedulableTrait,
         TableModelTrait;
 
     /**
@@ -20,24 +21,26 @@ class TableModel extends Model
      */
     protected $casts = [
         'private' => 'array',
-        'public'  => 'array'
+        'public'  => 'array',
     ];
 
     /**
-     * The attributes that should be casted by Carbon
+     * The attributes that should be casted by Carbon.
      *
      * @var array
      */
     protected $dates = [
         'created_at',
-        'updated_at'
+        'updated_at',
+        'started_at',
+        'ended_at'
     ];
 
     /**
      * @var array
      */
     protected $fillable = [
-        'uid', 'private', 'public', 'started_at', 'ended_at'
+        'uid', 'private', 'public', 'started_at', 'ended_at',
     ];
 
     /**

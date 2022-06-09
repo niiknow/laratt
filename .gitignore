@@ -1,7 +1,7 @@
 build/
 composer.lock
 vendor/
-.phpunit.result.cache
+.php*.*.cache
 coverage/
 .DS_Store
 tests/temp/

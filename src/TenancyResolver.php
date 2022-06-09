@@ -1,12 +1,13 @@
 <?php
+
 namespace Niiknow\Laratt;
 
 class TenancyResolver
 {
     /**
-     * Method for resolving tenant
+     * Method for resolving tenant.
      *
-     * @param  boolean $throwError throw error if tenant not found
+     * @param  bool $throwError throw error if tenant not found
      * @return string
      */
     public static function resolve($throwError = false)
@@ -14,17 +15,17 @@ class TenancyResolver
         // @codeCoverageIgnoreStart
 
         // attempt resolve by request
-        $req    = request();
+        $req = request();
         $tenant = '';
         if (isset($req)) {
-            $tenant = $req->header('x-tenant') ?? $req->query('x-tenant');
+            $tenant = $req->header('x-tenant') ?? $req->input('x-tenant');
         }
 
         // attempt resolve by resolver
-        if (!isset($tenant) || empty($tenant)) {
+        if (empty($tenant)) {
             $resolver = config('laratt.resolver', '');
 
-            if (!empty($resolver)
+            if (! empty($resolver)
                 && (strpos($resolver, 'niiknow') === false)
                 && is_callable($resolver)) {
                 $tenant = call_user_func($resolver);
@@ -32,15 +33,9 @@ class TenancyResolver
         }
 
         // throw error if not found
-        if (!isset($tenant) || empty($tenant)) {
-            if ($throwError) {
-                throw new \Symfony\Component\HttpKernel\Exception\HttpException(403, 'x-tenant is required.');
-            }
+        if (empty($tenant) && $throwError) {
+            throw new \Symfony\Component\HttpKernel\Exception\HttpException(403, 'x-tenant is required.');
         }
-
-        // @codeCoverageIgnoreEnd
-
-        return self::slug($tenant);
 
         // @codeCoverageIgnoreEnd
 
@@ -48,7 +43,7 @@ class TenancyResolver
     }
 
     /**
-     * create a tenant slug
+     * create a tenant slug.
      *
      * @param  string $tenant tenant id
      * @return string the slug

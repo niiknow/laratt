@@ -1,14 +1,10 @@
 <?php
+
 namespace Niiknow\Laratt\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Arr as Arr;
-use Illuminate\Support\Facades\DB as DB;
-use Illuminate\Support\Str;
-use League\Csv\Reader;
-use Maatwebsite\Excel\Excel as Excel;
 use Niiknow\Laratt\LarattException;
 use Niiknow\Laratt\Models\TableModel;
 use Niiknow\Laratt\RequestQueryBuilder;
@@ -20,7 +16,7 @@ use Yajra\DataTables\DataTables;
 trait ApiTableTrait
 {
     /**
-     * create a record
+     * create a record.
      *
      * @param  Request $request http request
      * @return object  the created object
@@ -31,34 +27,34 @@ trait ApiTableTrait
     }
 
     /**
-     * jQuery datatables endpoint
+     * jQuery datatables.net data endpoint.
      *
      * @return object datatable result
      */
     public function data(Request $request)
     {
-        $tf    = $this->getTenantField();
-        $item  = $this->getModel();
+        $tf = $this->getTenantField();
+        $item = $this->getModel();
         $query = \DB::table($item->getTable());
         $table = explode('$', $item->getTable())[1];
         if (null !== $tf) {
-            $tn    = $this->getTableName();
+            $tn = $this->getTableName();
             $query = $query->where($tf, $tn);
         }
 
         // exclude soft deleted items
-        if (!config('laratt.api_return_soft_deletes', false)) {
-            $traits          = class_uses($item);
+        if (! config('laratt.api_return_soft_deletes', false)) {
+            $traits = class_uses($item);
             $usesSoftDeletes = in_array('Illuminate\Database\Eloquent\SoftDeletes', $traits, true);
             if ($usesSoftDeletes) {
                 $query = $query->whereNull('deleted_at');
             }
         }
 
-        $dt            = DataTables::of($query);
-        $export        = $request->query('export');
+        $dt = DataTables::of($query);
+        $export = $request->query('export');
         $escapeColumns = $request->query('escapeColumns');
-        $eColumns      = [];
+        $eColumns = [];
 
         if ($escapeColumns !== null) {
             $eColumns = explode(',', $escapeColumns);
@@ -74,10 +70,10 @@ trait ApiTableTrait
             // get the table name from model
             $request->validate([
                 'export' => 'required|in:'
-                . config('laratt.export.exts', 'xlsx,ods,csv')
+                .config('laratt.export.exts', 'xlsx,ods,csv'),
             ]);
             $query = $dt->getFilteredQuery();
-            $file  = $table . '-' . time() . '.' . $export;
+            $file = $table.'-'.time().'.'.$export;
 
             return \Maatwebsite\Excel\Facades\Excel::download(
                 new TableExporter($query, $item),
@@ -89,17 +85,17 @@ trait ApiTableTrait
     }
 
     /**
-     * delete a record
+     * delete a record.
      *
      * @param  string $id   the object id
      * @return object found and deleted, error, or 404
      */
     public function delete(Request $request)
     {
-        $id   = $this->getId($request);
+        $id = $this->getId($request);
         $item = $this->findById($id);
 
-        if ($item && !$item->delete()) {
+        if ($item && ! $item->delete()) {
             throw new LarattException(__('exceptions.record.delete'));
         }
 
@@ -107,7 +103,7 @@ trait ApiTableTrait
     }
 
     /**
-     * drop a table
+     * drop a table.
      *
      * @return object drop success or error
      */
@@ -123,7 +119,7 @@ trait ApiTableTrait
     }
 
     /**
-     * import a csv file
+     * import a csv file.
      *
      * @param  UploadedFile $file    the file
      * @param  Request      $request http request
@@ -132,7 +128,7 @@ trait ApiTableTrait
     public function import(Request $request)
     {
         // disable paging if length is not set
-        $inputs    = $this->requestAll($request);
+        $inputs = $this->requestAll($request);
         $validator = Validator::make($inputs, ['file' => 'required']);
 
         if ($validator->fails()) {
@@ -140,10 +136,10 @@ trait ApiTableTrait
         }
 
         $file = $request->file('file')->openFile();
-        $csv  = \League\Csv\Reader::createFromFileObject($file)
+        $csv = \League\Csv\Reader::createFromFileObject($file)
             ->setHeaderOffset(0);
 
-        $data  = [];
+        $data = [];
         $model = $this->getModel();
 
         $rsp = $model->processCsv(
@@ -166,19 +162,19 @@ trait ApiTableTrait
     }
 
     /**
-     * query record by query parameter
+     * query record by query parameter.
      *
      * @param  Request $request http request
      * @return object  query result
      */
     public function query(Request $request)
     {
-        $tf    = $this->getTenantField();
-        $item  = $this->getModel();
+        $tf = $this->getTenantField();
+        $item = $this->getModel();
         $query = \DB::table($item->getTable());
 
         if (null !== $tf) {
-            $tn    = $this->getTenantName();
+            $tn = $this->getTenantName();
             $query = $query->where($tf, $tn);
         }
 
@@ -188,16 +184,16 @@ trait ApiTableTrait
     }
 
     /**
-     * restore a soft-deleted record
+     * restore a soft-deleted record.
      *
      * @param  Request $request http request
      * @return object  the restored object?
      */
     public function restore(Request $request)
     {
-        $id    = $this->getId($request);
+        $id = $this->getId($request);
         $model = $this->getModel();
-        $item  = call_user_func($model, 'withTrashed')
+        $item = call_user_func($model, 'withTrashed')
             ->findOrFail($id);
 
         $item->restore();
@@ -206,20 +202,20 @@ trait ApiTableTrait
     }
 
     /**
-     * retrieve a record
+     * retrieve a record.
      *
      * @return object the found object or 404
      */
     public function retrieve(Request $request)
     {
-        $id   = $this->getId($request);
+        $id = $this->getId($request);
         $item = $this->findById($id, true);
 
         return isset($item) ? $item : $this->rsp(404);
     }
 
     /**
-     * truncate a table
+     * truncate a table.
      *
      * @return object truncate success or error
      */
@@ -232,17 +228,17 @@ trait ApiTableTrait
     }
 
     /**
-     * update or insert a record
+     * update or insert a record.
      *
      * @param  Request $request http request
      * @return object  new record, updated record, or error
      */
     public function update(Request $request)
     {
-        $tf    = $this->getTenantField();
-        $id    = $this->getId($request);
+        $tf = $this->getTenantField();
+        $id = $this->getId($request);
         $rules = $this->vrules;
-        $data  = $this->requestAll($request);
+        $data = $this->requestAll($request);
 
         if (is_array($rules) && count($rules) > 0) {
             $validator = Validator::make($data, $rules);
@@ -266,7 +262,7 @@ trait ApiTableTrait
 
         if (isset($id)) {
             $input[$this->getIdField()] = $id;
-            $item                       = $this->findById($id, true);
+            $item = $this->findById($id, true);
 
             if (isset($item)) {
                 $item->fill($inputs);
@@ -275,7 +271,7 @@ trait ApiTableTrait
             }
         }
 
-        if (!$item->save()) {
+        if (! $item->save()) {
             throw new LarattException(__('exceptions.record.update'));
         }
 
@@ -283,9 +279,9 @@ trait ApiTableTrait
     }
 
     /**
-     * Find a model by id
+     * Find a model by id.
      * @param  string  $id           the id
-     * @param  boolean $loadIncludes true to load includes
+     * @param  bool $loadIncludes true to load includes
      * @return object  the model
      */
     protected function findById(
@@ -307,9 +303,9 @@ trait ApiTableTrait
     }
 
     /**
-     * Overridable function to exclude object properties
+     * Overridable function to exclude object properties.
      *
-     * @return Array list/array of properties to exclude from object
+     * @return array list/array of properties to exclude from object
      */
     protected function getExcludes()
     {
@@ -325,9 +321,9 @@ trait ApiTableTrait
     protected function getId(Request $request)
     {
         $idf = $this->getIdField();
-        $id  = $request->route($idf);
+        $id = $request->route($idf);
 
-        if (!isset($id)) {
+        if (! isset($id)) {
             $id = $request->input($idf);
         }
 
@@ -335,7 +331,7 @@ trait ApiTableTrait
     }
 
     /**
-     * Default id as uid
+     * Default id as uid.
      *
      * @return string the model id field
      */
@@ -355,7 +351,7 @@ trait ApiTableTrait
     }
 
     /**
-     * Override to provide the model for this controller
+     * Override to provide the model for this controller.
      *
      * @param  array  $attrs create and initialize new model
      * @return object the model
@@ -363,7 +359,7 @@ trait ApiTableTrait
     protected function getModel($attrs = [])
     {
         $table = $this->getTableName();
-        $item  = new TableModel($attrs);
+        $item = new TableModel($attrs);
         $item->createTableIfNotExists(
             TenancyResolver::resolve(),
             $table
@@ -373,7 +369,7 @@ trait ApiTableTrait
     }
 
     /**
-     * Overridable function get the query
+     * Overridable function get the query.
      *
      * @return Builder the eloquent query builder object
      */
@@ -386,7 +382,7 @@ trait ApiTableTrait
         $tf = $this->getTenantField();
 
         if (null !== $tf) {
-            $tn    = $this->getTableName();
+            $tn = $this->getTableName();
             $query = $query->where($tf, $tn);
         }
 
@@ -394,9 +390,7 @@ trait ApiTableTrait
     }
 
     /**
-     * Get the table name or tenant field value
-     *
-     *                  search with getTenantField
+     * Get the table name or tenant field value.
      * @return string null for global, table, or value use to
      */
     protected function getTableName()
@@ -404,7 +398,7 @@ trait ApiTableTrait
         $table = request()->route('table');
 
         $rules = [
-            'table' => 'required|regex:/[a-z0-9_]{3,30}/|not_in:profile,user,recipe,tables'
+            'table' => 'required|regex:/[a-z0-9_]{3,30}/|not_in:profile,user,recipe,tables',
         ];
 
         Validator::make(['table' => $table], $rules)->validate();
@@ -413,13 +407,12 @@ trait ApiTableTrait
     }
 
     /**
-     * Tenant field identify if it's a table or a field
+     * Tenant field identify if it's a table or a field.
      *
      * @return string null for table, value for tenant field name
      */
     protected function getTenantField()
     {
-        return;
     }
 
     /**
@@ -430,12 +423,12 @@ trait ApiTableTrait
     protected function requestAll(Request $request)
     {
         $inputs = $request->except($this->getExcludes());
-        $tf     = $this->getTenantField();
+        $tf = $this->getTenantField();
 
         if ($tf !== null) {
             $tn = $this->getTableName();
 
-            if (!isset($inputs[$tf])) {
+            if (! isset($inputs[$tf])) {
                 $inputs[$tf] = $tn;
             } elseif ($inputs[$tf] !== $tn) {
                 throw new LarattException(__('exceptions.table.does_not_match'));
@@ -446,9 +439,9 @@ trait ApiTableTrait
     }
 
     /**
-     * helper method to return response
+     * helper method to return response.
      *
-     * @param  integer  $code the http response code
+     * @param  int  $code the http response code
      * @param  object   $rsp  the response object
      * @return Response the http response
      */
@@ -456,7 +449,6 @@ trait ApiTableTrait
         $code,
         $rsp = null
     ) {
-
         if ($code === 404) {
             return response()->json(['error' => 'not found'], 404);
         }

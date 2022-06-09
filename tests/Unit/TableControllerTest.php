@@ -1,10 +1,7 @@
 <?php
+
 namespace Niiknow\Laratt\Tests\Unit;
 
-use Illuminate\Support\Facades\Request as Request;
-use Mockery as Mockery;
-use Niiknow\Laratt\Models\TableModel as TableModel;
-use Niiknow\Laratt\Tests\Controllers\TableController;
 use Niiknow\Laratt\Tests\TestCase;
 
 class TableControllerTest extends TestCase
@@ -34,15 +31,15 @@ class TableControllerTest extends TestCase
      */
     public function testCrudBoomTable()
     {
-        print "\n\r{$this->yellow}    should create, update, and delete table records...";
+        echo "\n\r{$this->yellow}    should create, update, and delete table records...";
 
         $c = new \Niiknow\Laratt\Tests\Controllers\TableController();
 
         $c->tableName = 'boom';
 
         $req = $this->getRequest('boom');
-        $pd  = [
-            'private.name' => 'Tom'
+        $pd = [
+            'private.name' => 'Tom',
         ];
 
         $req->shouldReceive('uid')
@@ -98,11 +95,11 @@ class TableControllerTest extends TestCase
         $this->assertInstanceOf(\Niiknow\Laratt\Models\TableModel::class, $rstr);
 
         $item = \Niiknow\Laratt\Models\TableModel::query()->from('tctest$boom')->where('uid', $rstc->uid)->first();
-        $this->assertTrue(!isset($item));
+        $this->assertTrue(! isset($item));
 
         // truncate table
         $c->truncate($req);
 
-        print " {$this->green}[OK]{$this->white}\r\n";
+        echo " {$this->green}[OK]{$this->white}\r\n";
     }
 }

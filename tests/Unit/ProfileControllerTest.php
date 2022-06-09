@@ -1,13 +1,8 @@
 <?php
+
 namespace Niiknow\Laratt\Tests\Unit;
 
-use Illuminate\Support\Facades\Request as Request;
-use Illuminate\Support\Facades\Storage as Storage;
-use Mockery as Mockery;
-use Niiknow\Laratt\Models\ProfileModel as ProfileModel;
-use Niiknow\Laratt\Tests\Controllers\ProfileController;
 use Niiknow\Laratt\Tests\TestCase;
-use SebastianBergmann\Comparator\Factory as Factory;
 
 class ProfileControllerTest extends TestCase
 {
@@ -36,14 +31,14 @@ class ProfileControllerTest extends TestCase
      */
     public function testCrudProfile()
     {
-        print "\n\r{$this->yellow}    should create, update, and delete profile...";
+        echo "\n\r{$this->yellow}    should create, update, and delete profile...";
 
-        $c   = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
+        $c = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
         $req = $this->getRequest('profile');
-        $pd  = [
+        $pd = [
             'email'      => 'tom@noogen.com',
             'first_name' => 'Tom',
-            'last_name'  => 'Noogen'
+            'last_name'  => 'Noogen',
         ];
 
         $req->shouldReceive('route')
@@ -101,12 +96,12 @@ class ProfileControllerTest extends TestCase
 
         $item = \Niiknow\Laratt\Models\ProfileModel::query()
             ->from('pctest$profile')->where('email', $pd['email'])->first();
-        $this->assertTrue(!isset($item));
+        $this->assertTrue(! isset($item));
 
         // truncate table
         $c->truncate($req);
 
-        print " {$this->green}[OK]{$this->white}\r\n";
+        echo " {$this->green}[OK]{$this->white}\r\n";
     }
 
     /**
@@ -114,7 +109,7 @@ class ProfileControllerTest extends TestCase
      */
     public function testImportProfile()
     {
-        print "\n\r{$this->yellow}    import profile...";
+        echo "\n\r{$this->yellow}    import profile...";
 
         // secret
         \Storage::fake('local');
@@ -123,7 +118,7 @@ class ProfileControllerTest extends TestCase
         $expected = 10;
 
         // create
-        $data  = "email,password,data.x,data.y,meta.domain\n";
+        $data = "email,password,data.x,data.y,meta.domain\n";
         $faker = \Faker\Factory::create();
         for ($i = 0; $i < $expected; $i++) {
             $fakedata = [
@@ -131,17 +126,17 @@ class ProfileControllerTest extends TestCase
                 'password'    => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm',
                 'data.x'      => $faker->catchPhrase,
                 'data.y'      => $faker->domainName,
-                'meta.domain' => $faker->domainWord
+                'meta.domain' => $faker->domainWord,
             ];
 
-            $data .= '"' . implode('","', $fakedata) . "\"\n";
+            $data .= '"'.implode('","', $fakedata)."\"\n";
         }
 
         // test: list all
         file_put_contents($filePath, $data);
         $file = new \Illuminate\Http\UploadedFile($filePath, 'test.csv', null, null, true);
 
-        $c   = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
+        $c = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
         $req = $this->getRequest('profile');
 
         $req->shouldReceive('except')
@@ -151,14 +146,14 @@ class ProfileControllerTest extends TestCase
             ->with('file')
             ->andReturn($file);
 
-        $rst   = $c->import($req);
+        $rst = $c->import($req);
         $count = \Niiknow\Laratt\Models\ProfileModel::query()->from('pctest$profile')->count();
         $this->assertSame($expected, $count, 'Has right count.');
 
         // test datatable query
         $c->drop($req);
 
-        print " {$this->green}[OK]{$this->white}\r\n";
+        echo " {$this->green}[OK]{$this->white}\r\n";
     }
 
     /**
@@ -166,15 +161,15 @@ class ProfileControllerTest extends TestCase
      */
     public function testQueryProfile()
     {
-        print "\n\r{$this->yellow}    query profile...";
+        echo "\n\r{$this->yellow}    query profile...";
         $expected = 20;
-        $c        = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
+        $c = new \Niiknow\Laratt\Tests\Controllers\ProfileController();
 
         $faker = \Faker\Factory::create();
         for ($i = 0; $i < $expected; $i++) {
             $pd = [
                 'email'    => $faker->unique()->safeEmail,
-                'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm' // var_dump($rst->toArray());
+                'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // var_dump($rst->toArray());
             ];
 
             $req = $this->getRequest('profile');
@@ -289,6 +284,6 @@ class ProfileControllerTest extends TestCase
         // drop table
         $c->truncate($req);
 
-        print " {$this->green}[OK]{$this->white}\r\n";
+        echo " {$this->green}[OK]{$this->white}\r\n";
     }
 }

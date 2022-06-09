@@ -1,17 +1,17 @@
 <?php
+
 namespace Niiknow\Laratt;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 /**
- * Class RequestQueryBuilder
- * @package src
+ * Class RequestQueryBuilder.
  */
 class RequestQueryBuilder
 {
     /**
-     * select columns
+     * select columns.
      * @var array
      */
     public $columns = [];
@@ -35,7 +35,7 @@ class RequestQueryBuilder
     public function __construct($builder, array $maps = [])
     {
         $this->builder = $builder;
-        $this->maps    = $maps;
+        $this->maps = $maps;
     }
 
     /**
@@ -51,19 +51,19 @@ class RequestQueryBuilder
 
         // use limit or per_page
         $limit = $request->query('limit');
-        if (!$limit) {
+        if (! $limit) {
             $limit = $request->query('per_page');
         }
 
         if ($limit && is_numeric($limit)) {
-            $limit = intVal($limit);
+            $limit = intval($limit);
         } else {
             $limit = 15;
         }
 
         $page = $request->query('page');
         if ($page && is_numeric($page)) {
-            $page = intVal($page);
+            $page = intval($page);
         } else {
             $page = 1;
         }
@@ -90,8 +90,8 @@ class RequestQueryBuilder
         $sel = $request->query('select');
         if (isset($sel)) {
             // do not allow caps in column name
-            $sel     = mb_strtolower($sel);
-            $cols    = collect(explode(',', $sel))->map(function ($col) {
+            $sel = mb_strtolower($sel);
+            $cols = collect(explode(',', $sel))->map(function ($col) {
                 // sanitize column name
                 return trim(preg_replace('/[^a-z0-9_\*]+/i', '', $col));
             })->filter(function ($col) {
@@ -130,7 +130,7 @@ class RequestQueryBuilder
      *  - In: ?filter[]=column:in:value1|value2|value3|...
      *  - Not in: ?filter[]=column:nin:value1|value2|value3|...
      *  - Null: ?filter[]=column:nl
-     *  - Not null: ?filter[]=column:nnl
+     *  - Not null: ?filter[]=column:nnl.
      *
      * Or queries are of the following format: ?filter[]=column:operator:value,column:operator:value,...
      * And queries are of the following format: ?filter[]=column:operator:value&filter[]=column:operator:value
@@ -140,7 +140,7 @@ class RequestQueryBuilder
      */
     public function applyRequestFilters(Request $request)
     {
-        if (!($filter = $request->query('filter'))) {
+        if (! ($filter = $request->query('filter'))) {
             return $this->builder;
         }
 
@@ -163,13 +163,13 @@ class RequestQueryBuilder
 
     /**
      * Applies the request's sort queries to the builder.
-     * Sort queries are of the following format: ?sort[]=column:direction(asc|desc)
+     * Sort queries are of the following format: ?sort[]=column:direction(asc|desc).
      * @param  Request   $request
      * @return Builder
      */
     public function applyRequestSorts(Request $request)
     {
-        if (!($sort = $request->query('sort'))) {
+        if (! ($sort = $request->query('sort'))) {
             return $this->builder;
         }
 
@@ -199,7 +199,7 @@ class RequestQueryBuilder
         $column = array_key_exists($column, $this->maps) ? $this->maps[$column] : $column;
 
         $operator = strtolower(trim($operator));
-        $value    = trim(rawurldecode($value));
+        $value = trim(rawurldecode($value));
 
         if (empty($column)) {
             return $this->builder;
@@ -336,7 +336,7 @@ class RequestQueryBuilder
 
         $direction = strtolower(trim($direction));
 
-        if (empty($column) || !in_array($direction, ['asc', 'desc'], true)) {
+        if (empty($column) || ! in_array($direction, ['asc', 'desc'], true)) {
             return $this->builder;
         }
 

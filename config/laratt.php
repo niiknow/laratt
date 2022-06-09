@@ -3,20 +3,20 @@
 return [
     'resolver'                => '',
     'export'                  => [
-        'exts' => 'xlsx,ods,csv'
+        'exts' => 'xlsx,ods,csv',
     ],
     'audit'                   => [
         'disk'    => env('AUDIT_DISK', 's3'),
         'bucket'  => env('AUDIT_BUCKET'),
         'include' => [
             'table'  => '.*',
-            'tenant' => '.*'
+            'tenant' => '.*',
         ],
         'exclude' => [
             'table'  => '(log.*|cache)',
-            'tenant' => null
-        ]
+            'tenant' => null,
+        ],
     ],
     'import_limit'            => 9999,
-    'api_return_soft_deletes' => false
+    'api_return_soft_deletes' => false,
 ];

@@ -1,4 +1,5 @@
 <?php
+
 namespace Niiknow\Laratt\Tests\Controllers;
 
 use Niiknow\Laratt\Traits\ApiTableTrait;
@@ -20,7 +21,7 @@ class TableController
         'started_at' => 'nullable|date|date_format:Y-m-d',
         'ended_at'   => 'nullable|date|date_format:Y-m-d',
         'private.*'  => 'nullable',
-        'public.*'   => 'nullable'
+        'public.*'   => 'nullable',
     ];
 
     /**

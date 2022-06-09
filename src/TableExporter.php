@@ -1,9 +1,7 @@
 <?php
+
 namespace Niiknow\Laratt;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr as Arr;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -32,7 +30,7 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
     public function __construct($query, $model)
     {
         // only fillable are exportable
-        $cols  = $model->getFillable();
+        $cols = $model->getFillable();
         $acols = [];
 
         if (method_exists($model, 'getExportable')) {
@@ -47,7 +45,7 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
         }
 
         $this->headings = $cols;
-        $this->acols    = $acols;
+        $this->acols = $acols;
     }
 
     /**
@@ -72,7 +70,7 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
      */
     public function map($item): array
     {
-        $rst  = [];
+        $rst = [];
         $data = $item->toArray();
 
         // use acols to determine if data will be array or string
@@ -82,14 +80,14 @@ class TableExporter implements FromCollection, WithHeadings, WithMapping
             // string array are pipe delimited
             if (strpos($class, 'StringArray:') !== false) {
                 $sep = str_replace('StringArray:', '', $class);
-                $da  = implode($sep, $da);
+                $da = implode($sep, $da);
             } elseif (is_object($da)) {
                 // object get convert to array
                 $da = json_decode(json_encode($da), true);
             }
 
             // if it's an object array then convert to string
-            if ($class === 'ObjectArray' && !is_string($da)) {
+            if ($class === 'ObjectArray' && ! is_string($da)) {
                 $da = json_encode($da);
             }
 

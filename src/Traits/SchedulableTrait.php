@@ -1,4 +1,5 @@
 <?php
+
 namespace Niiknow\Laratt\Traits;
 
 use Carbon\Carbon;
@@ -14,7 +15,7 @@ trait SchedulableTrait
     public static function bootSchedulableTrait()
     {
         static::creating(function ($model) {
-            if (!isset($model->started_at)) {
+            if (! isset($model->started_at)) {
                 $model->started_at = Carbon::now();
             }
         });
@@ -25,7 +26,7 @@ trait SchedulableTrait
      */
     public function getEndedAtAttribute($value)
     {
-        if (isset($value) && !empty($value)) {
+        if (! empty($value)) {
             return Carbon::parse($value)->format('Y-m-d');
         }
     }
@@ -35,7 +36,7 @@ trait SchedulableTrait
      */
     public function getStartedAtAttribute($value)
     {
-        if (isset($value) && !empty($value)) {
+        if (! empty($value)) {
             return Carbon::parse($value)->format('Y-m-d');
         }
     }

@@ -26,6 +26,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.19",
+        "friendsofphp/php-cs-fixer": "^3.8.0",
         "mockery/mockery": "^1.5",
         "orchestra/testbench": "^7.4.0",
         "phpunit/phpunit": "^9.5"
@@ -52,8 +53,9 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "phpcs": "phpcs",
-        "phpcs:fix": "phpcbf -w"
+        "phpcs": "phpcs -s --report=full --report=source",
+        "phpcs:fix": "phpcbf -w",
+        "format": "./vendor/bin/php-cs-fixer fix --using-cache=no"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

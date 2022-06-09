@@ -1,4 +1,5 @@
 <?php
+
 namespace Niiknow\Laratt\Models;
 
 use Carbon\Carbon;
@@ -15,7 +16,7 @@ class ProfileModel extends Authenticatable
         TableModelTrait;
 
     /**
-     * generated attributes
+     * generated attributes.
      *
      * @var array
      */
@@ -27,11 +28,11 @@ class ProfileModel extends Authenticatable
     protected $casts = [
         'meta'                     => 'array',
         'data'                     => 'array',
-        'is_retired_or_unemployed' => 'boolean'
+        'is_retired_or_unemployed' => 'boolean',
     ];
 
     /**
-     * The attributes that should be casted by Carbon
+     * The attributes that should be casted by Carbon.
      *
      * @var array
      */
@@ -41,7 +42,7 @@ class ProfileModel extends Authenticatable
         'password_updated_at',
         'email_verified_at',
         'tfa_exp_at',
-        'seen_at'
+        'seen_at',
     ];
 
     /**
@@ -59,7 +60,7 @@ class ProfileModel extends Authenticatable
         'is_retired_or_unemployed', 'occupation', 'employer',
 
         'pay_customer_id', 'pay_type', 'pay_brand', 'pay_last4', 'pay_month', 'pay_year',
-        'data', 'meta', 'seen_at', 'access'
+        'data', 'meta', 'seen_at', 'access',
     ];
 
     /**
@@ -97,7 +98,7 @@ class ProfileModel extends Authenticatable
 
             // field allowing for two factor auth
             $table->enum('tfa_type', [
-                'off', 'email', 'sms', 'call', 'google_soft_token', 'authy_soft_token', 'authy_onetouch'
+                'off', 'email', 'sms', 'call', 'google_soft_token', 'authy_soft_token', 'authy_onetouch',
             ])->default('off');
             $table->string('authy_id')->unique()->nullable();
             $table->string('authy_status')->nullable();
@@ -148,7 +149,7 @@ class ProfileModel extends Authenticatable
      */
     public function getNameAttribute($value)
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name.' '.$this->last_name;
     }
 
     // reset authy id
@@ -158,9 +159,9 @@ class ProfileModel extends Authenticatable
      */
     public function getPhotoUrlAttribute($value)
     {
-        $defaultUrl = 'https://www.gravatar.com/avatar/' . md5(mb_strtolower($this->email)) . '.jpg?s=200&d=mm';
+        $defaultUrl = 'https://www.gravatar.com/avatar/'.md5(mb_strtolower($this->email)).'.jpg?s=200&d=mm';
 
-        return !isset($value)
+        return ! isset($value)
         || strlen($value) <= 0
         || strpos($value, 'http') === false ? $defaultUrl : url($value);
     }
@@ -181,12 +182,12 @@ class ProfileModel extends Authenticatable
     public function setEmailAttribute($value)
     {
         $existing = $this->email;
-        $new      = mb_strtolower($value);
+        $new = mb_strtolower($value);
 
-// set expire in 10 minutes
+        // set expire in 10 minutes
         if ($existing !== $new) {
             $this->attributes['email'] = $new;
-            $this->authy_id            = null;
+            $this->authy_id = null;
         }
     }
 
@@ -211,7 +212,7 @@ class ProfileModel extends Authenticatable
      */
     public function setPasswordAttribute($value)
     {
-        $this->attributes['password']            = $value;
+        $this->attributes['password'] = $value;
         $this->attributes['password_updated_at'] = Carbon::now();
     }
 
@@ -221,11 +222,11 @@ class ProfileModel extends Authenticatable
     public function setPhoneAttribute($value)
     {
         $existing = $this->phone;
-        $new      = preg_replace('/\D+/', '', $value);
+        $new = preg_replace('/\D+/', '', $value);
 
         if ($existing !== $new) {
             $this->attributes['phone'] = $new;
-            $this->authy_id            = null;
+            $this->authy_id = null;
         }
     }
 
@@ -242,11 +243,11 @@ class ProfileModel extends Authenticatable
      */
     public function setTfaCode($value = null)
     {
-        if (!isset($value)) {
+        if (empty($value)) {
             $value = $this->generateTfaCode();
         }
 
-        $this->attributes['tfa_code']   = $value;
+        $this->attributes['tfa_code'] = $value;
         $this->attributes['tfa_exp_at'] = Carbon::now()->addMinutes(10);
     }
 

@@ -1,14 +1,12 @@
 <?php
+
 namespace Niiknow\Laratt\Traits;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Storage as Storage;
 
 /**
  * Add ability to audit to the cloud - such as s3
- * Enable revision support on s3
+ * Enable revision support on s3.
  */
 trait CloudAuditable
 {
@@ -25,7 +23,7 @@ trait CloudAuditable
                 $record = [
                     'key' => $key,
                     'old' => $auditable->getOriginal($key),
-                    'new' => $auditable->$key
+                    'new' => $auditable->$key,
                 ];
 
                 // do not log sensitive data
@@ -48,7 +46,7 @@ trait CloudAuditable
     /**
      * Determine if cloud audit is enabled.
      *
-     * @return boolean false if not enabled
+     * @return bool false if not enabled
      */
     public function canCloudAudit()
     {
@@ -57,20 +55,20 @@ trait CloudAuditable
         }
 
         $disk = config('laratt.audit.disk');
-        if (!isset($disk) || strlen($disk) <= 0) {
+        if (! isset($disk) || strlen($disk) <= 0) {
             return false;
         }
 
         $iten = config('laratt.audit.include.tenant');
         $itab = config('laratt.audit.include.table');
-        if (!isset($iten) || !isset($itab)) {
+        if (! isset($iten) || ! isset($itab)) {
             return false;
         }
 
-        $tn    = $this->getTable();
+        $tn = $this->getTable();
         $parts = explode('$', $tn);
-        if (!preg_match("/$iten/", $parts[0])
-            || !preg_match("/$itab/", $parts[1])) {
+        if (! preg_match("/$iten/", $parts[0])
+            || ! preg_match("/$itab/", $parts[1])) {
             return false;
         }
 
@@ -89,7 +87,7 @@ trait CloudAuditable
     }
 
     /**
-     * use to audit the current object
+     * use to audit the current object.
      *
      * @param  string $action audit action
      * @param  array  $log    extra log info
@@ -97,14 +95,14 @@ trait CloudAuditable
      */
     public function cloudAudit($action, $log = [])
     {
-        $id  = $this->id;
+        $id = $this->id;
         $uid = $this->{$this->getUidName()};
-        if (!isset($id) || !isset($uid)) {
+        if (! isset($id) || ! isset($uid)) {
             return;
         }
 
         if ($this->canCloudAudit()) {
-            $table    = $this->getTable();
+            $table = $this->getTable();
             $filename = "$table/$uid/index";
 
             return $this->cloudAuditWrite($action, $log, null, $filename);
@@ -121,13 +119,13 @@ trait CloudAuditable
     public function cloudAuditBody($action, $log = [])
     {
         // $user    = null;
-        $tn      = $this->getTable();
-        $parts   = explode('$', $tn);
+        $tn = $this->getTable();
+        $parts = explode('$', $tn);
         $request = request();
-        $route   = $request->route();
-        $now     = Carbon::now('UTC');
-        $memuse  = round(memory_get_peak_usage(true) / 1024 / 1024, 1);
-        $body    = [
+        $route = $request->route();
+        $now = Carbon::now('UTC');
+        $memuse = round(memory_get_peak_usage(true) / 1024 / 1024, 1);
+        $body = [
             // unique id allow for event idempotency/nonce key
             'app_name'   => config('app.name'),
             'class_name' => get_class($this),
@@ -138,7 +136,7 @@ trait CloudAuditable
             'log'        => $log,
             'created_at' => $now->timestamp,
             'mem_use'    => $memuse,
-            'uname'      => php_uname()
+            'uname'      => php_uname(),
         ];
 
         if ($route !== null) {
@@ -165,7 +163,7 @@ trait CloudAuditable
                 'full_url'       => $request->fullUrl(),
                 'route_action'   => $request->route()->getActionName(),
                 'route_query'    => $request->query(),
-                'route_params'   => $route_params
+                'route_params'   => $route_params,
             ]);
         }
 
@@ -174,7 +172,7 @@ trait CloudAuditable
 
     /**
      * write to cloud - allow to override or special audit
-     * per example use in bulk import
+     * per example use in bulk import.
      *
      * @param  string $action   audit action
      * @param  array  $log      extra log info
@@ -185,41 +183,40 @@ trait CloudAuditable
     public function cloudAuditWrite($action, $log = [], $model = null, $filename = null)
     {
         $bucket = config('laratt.audit.bucket');
-        if (!isset($bucket) || strlen($bucket) <= 0) {
+        if (! isset($bucket) || strlen($bucket) <= 0) {
             return $this;
         }
 
         $disk = config('laratt.audit.disk');
-        if (!isset($disk) || strlen($disk) <= 0) {
+        if (! isset($disk) || strlen($disk) <= 0) {
             return $this;
         }
 
         $table = $this->getTable();
 
-        if (!isset($filename)) {
+        if (! isset($filename)) {
             // timestamp in reverse chronological order
             // this allow for latest first
-            $now      = Carbon::now('UTC');
-            $filename = "$table/" . (9999 - $now->year) .
-                (99 - $now->month) .
-                (99 - $now->day) .
+            $now = Carbon::now('UTC');
+            $filename = "$table/".(9999 - $now->year).
+                (99 - $now->month).
+                (99 - $now->day).
                 '_revts';
-        } elseif (strpos($filename, $table . '/') === false) {
+        } elseif (strpos($filename, $table.'/') === false) {
             $path = "$table/$filename";
         }
 
-        $path = $filename . '.json';
+        $path = $filename.'.json';
         $body = $this->cloudAuditBody($action, $log);
 
         if ($model) {
             $body['custom'] = $model;
         } else {
-            $body['uid']      = $this->{$this->getUidName()};
+            $body['uid'] = $this->{$this->getUidName()};
             $body['model_id'] = $this->id;
-            $body['model']    = $this->toArray();
-            $body['info']     = $this->getCloudAuditInfo() ?: [];
+            $body['model'] = $this->toArray();
+            $body['info'] = $this->getCloudAuditInfo() ?: [];
         }
-
 
         // right now, only support s3
         \Storage::disk($disk)
@@ -231,10 +228,11 @@ trait CloudAuditable
                 $path,
                 gzencode(json_encode($body)),
                 'private',
-                ['params' => [
-                    'ContentType'     => 'application/json',
-                    'ContentEncoding' => 'gzip'
-                ]
+                [
+                    'params' => [
+                        'ContentType'     => 'application/json',
+                        'ContentEncoding' => 'gzip',
+                    ],
                 ]
             );
 
@@ -242,8 +240,8 @@ trait CloudAuditable
     }
 
     /**
-     * override this function to provide extra audit data
-     * @return Array Audit info
+     * override this function to provide extra audit data.
+     * @return array Audit info
      */
     public function getCloudAuditInfo()
     {

@@ -1,5 +1,7 @@
 <?php
+
 // phpcs:ignoreFile
+
 namespace Niiknow\Laratt;
 
 use Illuminate\Support\Facades\Route;
@@ -9,12 +11,12 @@ class LarattServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $this->publishes([__DIR__ . '/../config/laratt.php' => config_path('laratt.php')], 'config');
+        $this->publishes([__DIR__.'/../config/laratt.php' => config_path('laratt.php')], 'config');
     }
 
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/laratt.php', 'laratt');
+        $this->mergeConfigFrom(__DIR__.'/../config/laratt.php', 'laratt');
     }
 
     /**
@@ -31,57 +33,57 @@ class LarattServiceProvider extends ServiceProvider
 
         Route::match(
             ['get', 'delete'],
-            $model . '/query',
-            $modelName . 'Controller@query'
-        )->name("$prefix.$model" . '.query');
+            $model.'/query',
+            $modelName.'Controller@query'
+        )->name("$prefix.$model".'.query');
 
         Route::match(
             ['get', 'post'],
-            $model . '/data',
-            $modelName . 'Controller@data'
-        )->name("$prefix.$model" . '.data');
+            $model.'/data',
+            $modelName.'Controller@data'
+        )->name("$prefix.$model".'.data');
 
         Route::match(
             ['post'],
-            $model . '/create',
-            $modelName . 'Controller@create'
-        )->name("$prefix.$model" . '.create');
+            $model.'/create',
+            $modelName.'Controller@create'
+        )->name("$prefix.$model".'.create');
 
         Route::match(
             ['get', 'post'],
-            $model . '/{' . $idField . '}/retrieve',
-            $modelName . 'Controller@retrieve'
-        )->name('laratt.' . $model . '.retrieve');
+            $model.'/{'.$idField.'}/retrieve',
+            $modelName.'Controller@retrieve'
+        )->name('laratt.'.$model.'.retrieve');
 
         Route::match(
             ['post'],
-            $model . '/{' . $idField . '}/update',
-            $modelName . 'Controller@update'
-        )->name("$prefix.$model" . '.update');
+            $model.'/{'.$idField.'}/update',
+            $modelName.'Controller@update'
+        )->name("$prefix.$model".'.update');
 
         Route::match(
             ['post', 'delete'],
-            $model . '/{' . $idField . '}/delete',
-            $modelName . 'Controller@delete'
-        )->name("$prefix.$model" . '.delete');
+            $model.'/{'.$idField.'}/delete',
+            $modelName.'Controller@delete'
+        )->name("$prefix.$model".'.delete');
 
         Route::match(
             ['post'],
-            $model . '/import',
-            $modelName . 'Controller@import'
-        )->name("$prefix.$model" . '.import');
+            $model.'/import',
+            $modelName.'Controller@import'
+        )->name("$prefix.$model".'.import');
 
         Route::match(
             ['post'],
-            $model . '/truncate',
-            $modelName . 'Controller@truncate'
-        )->name("$prefix.$model" . '.truncate');
+            $model.'/truncate',
+            $modelName.'Controller@truncate'
+        )->name("$prefix.$model".'.truncate');
 
         Route::match(
             ['post'],
-            $model . '/drop',
-            $modelName . 'Controller@drop'
-        )->name("$prefix.$model" . '.drop');
+            $model.'/drop',
+            $modelName.'Controller@drop'
+        )->name("$prefix.$model".'.drop');
     }
 
     /**
@@ -98,55 +100,55 @@ class LarattServiceProvider extends ServiceProvider
         Route::match(
             ['get', 'delete'],
             'tables/query',
-            $controller . '@query'
-        )->name($prefix . '.tables.query');
+            $controller.'@query'
+        )->name($prefix.'.tables.query');
 
         Route::match(
             ['get', 'post'],
             'tables/data',
-            $controller . '@data'
-        )->name($prefix . '.tables.data');
+            $controller.'@data'
+        )->name($prefix.'.tables.data');
 
         Route::match(
             ['post'],
             'tables/{table}/create',
-            $controller . '@create'
-        )->name($prefix . '.tables.create');
+            $controller.'@create'
+        )->name($prefix.'.tables.create');
 
         Route::match(
             ['get', 'post'],
-            'tables/{table}/{' . $idField . '}/retrieve',
-            $controller . '@retrieve'
-        )->name($prefix . '.tables.retrieve');
+            'tables/{table}/{'.$idField.'}/retrieve',
+            $controller.'@retrieve'
+        )->name($prefix.'.tables.retrieve');
 
         Route::match(
             ['post'],
-            'tables/{table}/{' . $idField . '}/update',
-            $controller . '@update'
-        )->name($prefix . '.tables.update');
+            'tables/{table}/{'.$idField.'}/update',
+            $controller.'@update'
+        )->name($prefix.'.tables.update');
 
         Route::match(
             ['post', 'delete'],
-            'tables/{table}/{' . $idField . '}/delete',
-            $controller . '@delete'
-        )->name($prefix . '.tables.delete');
+            'tables/{table}/{'.$idField.'}/delete',
+            $controller.'@delete'
+        )->name($prefix.'.tables.delete');
 
         Route::match(
             ['post'],
             'tables/{table}/import',
-            $controller . '@import'
-        )->name($prefix . '.tables.import');
+            $controller.'@import'
+        )->name($prefix.'.tables.import');
 
         Route::match(
             ['post'],
             'tables/{table}/truncate',
-            $controller . '@truncate'
-        )->name($prefix . '.tables.truncate');
+            $controller.'@truncate'
+        )->name($prefix.'.tables.truncate');
 
         Route::match(
             ['post'],
             'tables/{table}/drop',
-            $controller . '@drop'
-        )->name($prefix . '.tables.drop');
+            $controller.'@drop'
+        )->name($prefix.'.tables.drop');
     }
 }

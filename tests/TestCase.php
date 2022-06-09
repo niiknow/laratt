@@ -1,7 +1,7 @@
 <?php
+
 namespace Niiknow\Laratt\Tests;
 
-use Illuminate\Support\Arr as Arr;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
@@ -30,8 +30,8 @@ abstract class TestCase extends OrchestraTestCase
 
         $app['config']->set('database.connections.sqlite', [
             'driver'   => 'sqlite',
-            'database' => $this->getTempDirectory() . '/database.sqlite',
-            'prefix'   => ''
+            'database' => $this->getTempDirectory().'/database.sqlite',
+            'prefix'   => '',
         ]);
 
         $app['config']->set('laratt', [
@@ -41,25 +41,25 @@ abstract class TestCase extends OrchestraTestCase
                 'bucket'  => null,
                 'include' => [
                     'table'  => '.*',
-                    'tenant' => '.*'
+                    'tenant' => '.*',
                 ],
                 'exclude' => [
                     'table'  => '(log.*|cache)',
-                    'tenant' => null
-                ]
+                    'tenant' => null,
+                ],
             ],
-            'import_limit' => 9999
+            'import_limit' => 9999,
         ]);
     }
 
     public function getResolver()
     {
-        return get_class($this) . '::tenant';
+        return get_class($this).'::tenant';
     }
 
     public function getTempDirectory(): string
     {
-        return __DIR__ . '/temp';
+        return __DIR__.'/temp';
     }
 
     protected function checkRequirements()
@@ -84,7 +84,7 @@ abstract class TestCase extends OrchestraTestCase
 
     protected function resetDatabase()
     {
-        file_put_contents($this->getTempDirectory() . '/database.sqlite', null);
+        file_put_contents($this->getTempDirectory().'/database.sqlite', null);
     }
 
     protected function setUp(): void

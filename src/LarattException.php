@@ -1,4 +1,5 @@
 <?php
+
 namespace Niiknow\Laratt;
 
 use Exception;
@@ -8,5 +9,4 @@ use Exception;
  */
 class LarattException extends Exception
 {
-
 }

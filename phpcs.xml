@@ -108,7 +108,7 @@
 
   <rule ref="Generic.ControlStructures.InlineControlStructure"/>
   <rule ref="Generic.Formatting.DisallowMultipleStatements"/>
-  <rule ref="Generic.Formatting.MultipleStatementAlignment"/>
+<!--   <rule ref="Generic.Formatting.MultipleStatementAlignment"/> -->
   <rule ref="Generic.Metrics.CyclomaticComplexity"/>
   <rule ref="Generic.Metrics.NestingLevel"/>
   <rule ref="Generic.PHP.DeprecatedFunctions"/>

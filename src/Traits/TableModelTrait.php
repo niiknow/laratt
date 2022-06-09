@@ -1,11 +1,7 @@
 <?php
+
 namespace Niiknow\Laratt\Traits;
 
-use Illuminate\Support\Arr as Arr;
-use Illuminate\Support\Facades\Cache as Cache;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB as DB;
-use Illuminate\Support\Facades\Log as Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Niiknow\Laratt\TenancyResolver;
@@ -13,7 +9,7 @@ use Validator;
 
 /**
  * Add ability to audit to the cloud - such as s3
- * Enable revision support on s3
+ * Enable revision support on s3.
  */
 trait TableModelTrait
 {
@@ -24,7 +20,7 @@ trait TableModelTrait
         static::creating(function ($model) {
             $uidName = $model->getUidName();
 
-            if (!isset($model->{$uidName})) {
+            if (! isset($model->{$uidName})) {
                 // automatically add uid if not provided
                 $model->{$uidName} = (string) Str::uuid();
             }
@@ -45,23 +41,23 @@ trait TableModelTrait
         $tableNew = null;
 
         // invalid tenant, exit - throw exception?
-        if (isset($tenant) && !empty($tenant) && strlen($tenant) < 3) {
+        if (isset($tenant) && ! empty($tenant) && strlen($tenant) < 3) {
             return $tableNew;
         }
 
         // invalid table name, exit - throw exception?
-        if (isset($tableName) && !empty($tableName) && strlen($tableName) < 3) {
+        if (isset($tableName) && ! empty($tableName) && strlen($tableName) < 3) {
             return $tableNew;
         }
 
         $tableNew = $this->setTableName($tenant, $tableName);
 
-// only need to improve performance in prod
-        if (strpos(config('env'), 'pr') === 0 && \Cache::has('tnc_' . $tableNew)) {
+        // only need to improve performance in prod
+        if (strpos(config('env'), 'pr') === 0 && \Cache::has('tnc_'.$tableNew)) {
             return $tableNew;
         }
 
-        if (!Schema::hasTable($tableNew)) {
+        if (! Schema::hasTable($tableNew)) {
             if (isset($schemaFunction) && is_callable($schemaFunction)) {
                 Schema::create($tableNew, $schemaFunction);
             } elseif (method_exists($this, 'createTable')) {
@@ -69,7 +65,7 @@ trait TableModelTrait
             }
         }
 
-        \Cache::add('tnc_' . $tableNew, 'true', 45 * 60);
+        \Cache::add('tnc_'.$tableNew, 'true', 45 * 60);
 
         return $tableNew;
     }
@@ -86,13 +82,13 @@ trait TableModelTrait
 
         Schema::dropIfExists($tableNew);
 
-        \Cache::forget('tnc_' . $tableNew);
+        \Cache::forget('tnc_'.$tableNew);
     }
 
     /**
-     * get no audit
+     * get no audit.
      *
-     * @return boolean true if not audit
+     * @return bool true if not audit
      */
     public function getNoAudit()
     {
@@ -100,9 +96,9 @@ trait TableModelTrait
     }
 
     /**
-     * get no_audit property
+     * get no_audit property.
      *
-     * @return boolean if enable audit
+     * @return bool if enable audit
      */
     public function getNoAuditAttribute()
     {
@@ -110,7 +106,7 @@ trait TableModelTrait
     }
 
     /**
-     * Get the uid field name
+     * Get the uid field name.
      *
      * @return [type] [description]
      */
@@ -120,7 +116,7 @@ trait TableModelTrait
     }
 
     /**
-     * process the csv records
+     * process the csv records.
      *
      * @param  array  $csv    the csv rows data
      * @param  array  &$data  the result array
@@ -136,7 +132,7 @@ trait TableModelTrait
 
             foreach ($row as $key => $value) {
                 $cell = $value;
-                if (!is_string($cell)) {
+                if (! is_string($cell)) {
                     $cell = (string) $cell;
                 }
                 $cv = trim(mb_strtolower($cell));
@@ -145,7 +141,7 @@ trait TableModelTrait
                     || $cv === 'nil'
                     || $cv === 'undefined') {
                     $cell = null;
-                } elseif (!is_string($value) && is_numeric($cv)) {
+                } elseif (! is_string($value) && is_numeric($cv)) {
                     $cell = $cell + 0;
                 }
 
@@ -160,7 +156,7 @@ trait TableModelTrait
                         'code'  => 422,
                         'error' => $validator->errors(),
                         'rowno' => $rowno,
-                        'row'   => $inputs
+                        'row'   => $inputs,
                     ];
                 }
             }
@@ -172,7 +168,7 @@ trait TableModelTrait
                 return [
                     'code'  => 422,
                     'error' => "Import must be less than $limit records",
-                    'count' => $rowno
+                    'count' => $rowno,
                 ];
             }
         }
@@ -188,10 +184,10 @@ trait TableModelTrait
     public function saveImport(&$data, $table, $idField = null)
     {
         $inserted = [];
-        $updated  = [];
-        $skipped  = [];
-        $rowno    = 1;
-        $row      = [];
+        $updated = [];
+        $skipped = [];
+        $rowno = 1;
+        $row = [];
 
         if ($idField === null) {
             $idField = $this->getUidName();
@@ -201,7 +197,7 @@ trait TableModelTrait
         try {
             $rowno = 1;
             foreach ($data as $inputs) {
-                $row               = $inputs;
+                $row = $inputs;
                 list($stat, $item) = $this->saveImportItem($inputs, $table, $idField);
 
                 if (null === $item && $stat !== 'skip') {
@@ -212,7 +208,7 @@ trait TableModelTrait
                         'code'  => 422,
                         'error' => 'Error while attempting to import row',
                         'rowno' => $rowno,
-                        'row'   => $row
+                        'row'   => $row,
                     ];
                 }
 
@@ -233,13 +229,13 @@ trait TableModelTrait
         } catch (\Exception $e) {
             \DB::rollback();
             $message = $e->getMessage();
-            \Log::error('API import error: ' . $message);
+            \Log::error('API import error: '.$message);
 
             return [
                 'code'  => 422,
                 'error' => $message,
                 'rowno' => $rowno,
-                'row'   => $row
+                'row'   => $row,
             ];
         }
 
@@ -248,7 +244,7 @@ trait TableModelTrait
             'count'    => $rowno,
             'inserted' => $inserted,
             'updated'  => $updated,
-            'skipped'  => $skipped
+            'skipped'  => $skipped,
         ];
     }
 
@@ -264,9 +260,9 @@ trait TableModelTrait
         }
 
         $model = get_class($this);
-        $stat  = 'insert';
-        $id    = isset($inputs[$idField]) ? $inputs[$idField] : null;
-        $item  = new $model($inputs);
+        $stat = 'insert';
+        $id = isset($inputs[$idField]) ? $inputs[$idField] : null;
+        $item = new $model($inputs);
         $item->setTableName(null, $table);
 
         if (isset($id)) {
@@ -296,9 +292,9 @@ trait TableModelTrait
     }
 
     /**
-     * Set no audit attribute
+     * Set no audit attribute.
      *
-     * @param  boolean $no_audit
+     * @param  bool $no_audit
      * @return $this
      */
     public function setNoAudit($no_audit)
@@ -309,9 +305,9 @@ trait TableModelTrait
     }
 
     /**
-     * set no_audit property
+     * set no_audit property.
      *
-     * @return boolean if enable audit
+     * @return bool if enable audit
      */
     public function setNoAuditAttribute($value)
     {
@@ -331,7 +327,7 @@ trait TableModelTrait
             $tenant = TenancyResolver::resolve();
         }
 
-        $newName = TenancyResolver::slug($tenant) . '$' . TenancyResolver::slug($tableName);
+        $newName = TenancyResolver::slug($tenant).'$'.TenancyResolver::slug($tableName);
 
         $this->table = $newName;
 
@@ -339,7 +335,7 @@ trait TableModelTrait
     }
 
     /**
-     * Set uid field and make sure it's a slug
+     * Set uid field and make sure it's a slug.
      *
      * @param $value
      */
@@ -360,10 +356,10 @@ trait TableModelTrait
         $tenant = null
     ) {
         $this->createTableIfNotExists($tenant, $table);
-        $tn    = $this->getTable();
+        $tn = $this->getTable();
         $query = $this->query();
         $query = $query->setModel($this);
-        $item  = $query->where($this->getUidName(), $uid)->first();
+        $item = $query->where($this->getUidName(), $uid)->first();
         if (isset($item)) {
             $item->setTableName($tenant, $table);
         }
