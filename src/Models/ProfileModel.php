@@ -7,12 +7,12 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use Niiknow\Laratt\Traits\CloudAuditable;
+use Niiknow\Laratt\Traits\AuditableTrait;
 use Niiknow\Laratt\Traits\TableModelTrait;
 
 class ProfileModel extends Authenticatable
 {
-    use CloudAuditable,
+    use AuditableTrait,
         TableModelTrait;
 
     /**

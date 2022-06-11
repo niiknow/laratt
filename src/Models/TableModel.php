@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use Niiknow\Laratt\Traits\CloudAuditable;
+use Niiknow\Laratt\Traits\AuditableTrait;
 use Niiknow\Laratt\Traits\SchedulableTrait;
 use Niiknow\Laratt\Traits\TableModelTrait;
 
 class TableModel extends Model
 {
-    use CloudAuditable,
+    use AuditableTrait,
         SchedulableTrait,
         TableModelTrait;
 

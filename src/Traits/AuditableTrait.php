@@ -55,11 +55,6 @@ trait AuditableTrait
             return false;
         }
 
-        $disk = config('laratt.audit.disk');
-        if (empty($disk)) {
-            return false;
-        }
-
         $iten = config('laratt.audit.include.tenant');
         $itab = config('laratt.audit.include.table');
         if (empty($iten) || empty($itab)) {
