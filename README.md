@@ -18,7 +18,7 @@ php artisan vendor:publish --provider="Niiknow\Laratt\LarattServiceProvider"
 ## Features
 - [x] Use special character `$` for tenant and table separator.  Most database allow for this character.
 - [x] Dynamic table as `tenant$table_name`
-- [x] Tenant resolution use `X-Tenant` header by default; though, it is customizable by providing a static function for `resolver` config.
+- [x] Tenant resolution use `x-tenant` header/input by default; though, it is customizable by providing a static function for `resolver` config.
 - [x] A generic Controller Trait that provide simple and flexible CRUD (create, retrieve, update, delete) REST endpoint.
 - [x] Simple query and bulk delete `/query` REST endpoint.
 - [x] jQuery DataTables as `/data` endpoint with [laravel-datatables](https://github.com/yajra/laravel-datatables) 
