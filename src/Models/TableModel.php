@@ -33,7 +33,7 @@ class TableModel extends Model
         'created_at',
         'updated_at',
         'started_at',
-        'ended_at'
+        'ended_at',
     ];
 
     /**

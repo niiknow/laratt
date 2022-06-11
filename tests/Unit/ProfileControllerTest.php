@@ -169,7 +169,7 @@ class ProfileControllerTest extends TestCase
         for ($i = 0; $i < $expected; $i++) {
             $pd = [
                 'email'    => $faker->unique()->safeEmail,
-                'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // var_dump($rst->toArray());
+                'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm',
             ];
 
             $req = $this->getRequest('profile');
