@@ -34,7 +34,7 @@ class TenancyResolver
 
         // throw error if not found
         if (empty($tenant) && $throwError) {
-            throw new \Symfony\Component\HttpKernel\Exception\HttpException(403, 'x-tenant is required.');
+            throw new \Symfony\Component\HttpKernel\Exception\HttpException(403, __('laratt.x_tenant_required'));
         }
 
         // @codeCoverageIgnoreEnd
