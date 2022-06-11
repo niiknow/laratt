@@ -24,7 +24,6 @@ php artisan vendor:publish --provider="Niiknow\Laratt\LarattServiceProvider"
 - [x] jQuery DataTables as `/data` endpoint with [laravel-datatables](https://github.com/yajra/laravel-datatables) 
 - [x] Pre-defined structured schema for `ProfileModel`
 - [x] Schedulable and ecommerce schema type for `TableModel`
-- [x] Cloud auditable (s3 backed) of individual record transaction.  This allow you to trigger aws lambda on some event instead of having to create scheduled jobs.
 - [x] Being able to include and exclude table from auditable - so you don't have to audit things like when you're using it for logging, caching, or when client doesn't need it for some particular reason. 
 
 **CONS** It doesn't support table relationship.
