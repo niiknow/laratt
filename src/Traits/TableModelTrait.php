@@ -40,14 +40,14 @@ trait TableModelTrait
     ) {
         $tableNew = null;
 
-        // invalid tenant, exit - throw exception?
+        // invalid tenant
         if (isset($tenant) && ! empty($tenant) && strlen($tenant) < 3) {
-            return $tableNew;
+            throw new LarattException(__('exceptions.tenant.invalidname'));
         }
 
-        // invalid table name, exit - throw exception?
+        // invalid table name
         if (isset($tableName) && ! empty($tableName) && strlen($tableName) < 3) {
-            return $tableNew;
+            throw new LarattException(__('exceptions.tenant.invalidtable'));
         }
 
         $tableNew = $this->setTableName($tenant, $tableName);
@@ -78,6 +78,16 @@ trait TableModelTrait
         $tenant,
         $tableName
     ) {
+        // invalid tenant
+        if (isset($tenant) && ! empty($tenant) && strlen($tenant) < 3) {
+            throw new LarattException(__('exceptions.tenant.invalidname'));
+        }
+
+        // invalid table name
+        if (isset($tableName) && ! empty($tableName) && strlen($tableName) < 3) {
+            throw new LarattException(__('exceptions.tenant.invalidtable'));
+        }
+
         $tableNew = $this->setTableName($tenant, $tableName);
 
         Schema::dropIfExists($tableNew);
