@@ -59,8 +59,8 @@ class TableModel extends Model
             $table->timestamp('started_at')->nullable()->index();
             $table->timestamp('ended_at')->nullable()->index();
 
-            $table->longText('private')->nullable();
-            $table->longText('public')->nullable();
+            $table->longText('privatedata')->nullable();
+            $table->longText('publicdata')->nullable();
             $table->timestamps();
         });
     }

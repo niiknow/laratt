@@ -20,8 +20,8 @@ class TableController
         'uid'        => 'nullable|string|max:50',
         'started_at' => 'nullable|date|date_format:Y-m-d',
         'ended_at'   => 'nullable|date|date_format:Y-m-d',
-        'private.*'  => 'nullable',
-        'public.*'   => 'nullable',
+        'publicdata.*'  => 'nullable',
+        'privatedata.*'   => 'nullable',
     ];
 
     /**
